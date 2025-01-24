@@ -1,0 +1,114 @@
+{
+pub(all) type Lexer Lexbuf
+
+let pos_fname : Ref[String] = Ref::new("<none>")
+let pos_lnum : Ref[Int] = Ref::new(1)
+let pos_bol : Ref[Int] = Ref::new(0)
+
+let has_lex_error : Ref[Bool] = Ref::new(false)
+
+fn reset_lex(fname : String) -> Unit {
+  pos_fname.val = fname
+  pos_lnum.val = 1
+  pos_bol.val = 0
+  has_lex_error.val = false
+}
+
+fn newline(pos : Int) -> Unit {
+  pos_lnum.val += 1
+  pos_bol.val = pos
+}
+
+fn newpos(pos : Int) -> Pos {
+  { fname: pos_fname.val, lnum: pos_lnum.val, bol: pos_bol.val, cnum: pos }
+}
+
+fn record_lex_error(msg : String, start : Pos, end : Pos) -> Unit {
+  println("Error:\{FI(start, end)} \{msg}")
+  has_lex_error.val = true
+}
+
+let comment_depth : Ref[Int] = Ref::new(0)
+
+let string_builder : StringBuilder = StringBuilder::new()
+let string_start : Ref[Int] = Ref::new(0)
+}
+
+rule token() -> (Token, Position, Position) {
+  parse {
+    ('\r'* '\n') as t => { newline($endpos(t)); token(lexbuf) }
+    [' ' '\t']+ => { token(lexbuf) }
+    "*/" as t => { record_lex_error("unmatched end of comment", newpos($startpos(t)), newpos($endpos(t))); token(lexbuf) }
+    "/*" => { comment_depth.val = 1; comment(lexbuf); token(lexbuf) }
+    ['0'-'9']+ as t => {
+      try {
+        (INTV(@strconv.parse_int!(t)), newpos($startpos(t)), newpos($endpos(t)))
+      } catch {
+        StrConvError(_) => {
+          record_lex_error("int literal invalid", newpos($startpos(t)), newpos($endpos(t)))
+          token(lexbuf)
+        }
+      }
+    }
+    "else" as t => { (ELSE, newpos($startpos(t)), newpos($endpos(t))) }
+    "false" as t => { (FALSE, newpos($startpos(t)), newpos($endpos(t))) }
+    "if" as t => { (IF, newpos($startpos(t)), newpos($endpos(t))) }
+    "import" as t => { (IMPORT, newpos($startpos(t)), newpos($endpos(t))) }
+    "iszero" as t => { (ISZERO, newpos($startpos(t)), newpos($endpos(t))) }
+    "lambda" as t => { (LAMBDA, newpos($startpos(t)), newpos($endpos(t))) }
+    "pred" as t => { (PRED, newpos($startpos(t)), newpos($endpos(t))) }
+    "succ" as t => { (SUCC, newpos($startpos(t)), newpos($endpos(t))) }
+    "then" as t => { (THEN, newpos($startpos(t)), newpos($endpos(t))) }
+    "true" as t => { (TRUE, newpos($startpos(t)), newpos($endpos(t))) }
+    "Bool" as t => { (UBOOL, newpos($startpos(t)), newpos($endpos(t))) }
+    "Nat" as t => { (UNAT, newpos($startpos(t)), newpos($endpos(t))) }
+    (['a'-'z' '_'] ['A'-'Z' 'a'-'z' '_' '0'-'9' ''']*) as t => { (LCID(t), newpos($startpos(t)), newpos($endpos(t))) }
+    "->" as t => { (ARROW, newpos($startpos(t)), newpos($endpos(t))) }
+    ":" as t => { (COLON, newpos($startpos(t)), newpos($endpos(t))) }
+    "." as t => { (DOT, newpos($startpos(t)), newpos($endpos(t))) }
+    "=" as t => { (EQ, newpos($startpos(t)), newpos($endpos(t))) }
+    "(" as t => { (LPAREN, newpos($startpos(t)), newpos($endpos(t))) }
+    ")" as t => { (RPAREN, newpos($startpos(t)), newpos($endpos(t))) }
+    ";" as t => { (SEMI, newpos($startpos(t)), newpos($endpos(t))) }
+    "_" as t => { (USCORE, newpos($startpos(t)), newpos($endpos(t))) }
+    '"' as t => { string_builder.reset(); string_start.val = $startpos(t); string(lexbuf) }
+    eof as t => { (EOF, newpos($startpos(t)), newpos($endpos(t))) }
+    _ as t => {
+      record_lex_error("unrecognized token", newpos($startpos(t)), newpos($endpos(t)))
+      token(lexbuf)
+    }
+  }
+}
+
+rule comment() -> Unit {
+  parse {
+    "/*" => { comment_depth.val += 1; comment(lexbuf) }
+    "*/" => { comment_depth.val -= 1; if comment_depth.val > 0 { comment(lexbuf) } }
+    eof as t => { record_lex_error("comment not terminated", newpos($startpos(t)), newpos($endpos(t))) }
+    [^ '\n'] => { comment(lexbuf) }
+    '\n' as t => { newline($endpos(t)); comment(lexbuf) }
+  }
+}
+
+rule string() -> (Token, Position, Position) {
+  parse {
+    '"' as t => { (STRINGV(string_builder.to_string()), newpos(string_start.val), newpos($endpos(t))) }
+    '\x5c' => { string_builder.write_string("\x5c\x5c"); string(lexbuf) }
+    '\n' as t => { string_builder.write_string("\n"); newline($endpos(t)); string(lexbuf) }
+    eof as t => {
+      record_lex_error("string not terminated", newpos($startpos(t)), newpos($endpos(t)))
+      (EOF, newpos($startpos(t)), newpos($endpos(t)))
+    }
+    _ as t => { string_builder.write_string(t); string(lexbuf) }
+  }
+}
+
+{
+pub fn new_lexer(input : String) -> Lexer {
+  Lexbuf::from_string(input)
+}
+
+pub fn next_token(self : Lexer) -> (Token, Position, Position) {
+  token(self._)
+}
+}
