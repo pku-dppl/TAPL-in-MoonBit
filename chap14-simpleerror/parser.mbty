@@ -1,0 +1,123 @@
+%derive<Show> Token
+%derive<Show> ParseError
+%position<Pos>
+%start toplevel
+
+%token EOF
+%token ELSE         "else"
+%token ERROR        "error"
+%token FALSE        "false"
+%token IF           "if"
+%token IMPORT       "import"
+%token ISZERO       "iszero"
+%token LAMBDA       "lambda"
+%token PRED         "pred"
+%token SUCC         "succ"
+%token THEN         "then"
+%token TRUE         "true"
+%token TRY          "try"
+%token WITH         "with"
+%token UBOOL        "Bool"
+%token UBOT         "Bot"
+%token UNAT         "Nat"
+%token UTOP         "Top"
+%token<String> LCID
+%token<Int> INTV
+%token<String> STRINGV
+%token ARROW        "->"
+%token COLON        ":"
+%token DOT          "."
+%token EQ           "="
+%token LPAREN       "("
+%token RPAREN       ")"
+%token SEMI         ";"
+%token USCORE       "_"
+
+%type<ParseToplevel> toplevel
+%type<ParseCommand> command
+%type<ParseBinder> binder
+%type<ParseTerm> term
+%type<ParseTerm> app_term
+%type<ParseTerm> atom_term
+%type<ParseType> type
+%type<ParseType> atom_type
+
+%%
+
+toplevel
+  : EOF                                 { fn(ctx) { (Nil, ctx) } }
+  | command ";" toplevel                {
+      fn(ctx) {
+        let (cmd, ctx1) = $1!(ctx)
+        let (cmds, ctx2) = $3!(ctx1)
+        (Cons(cmd, cmds), ctx2)
+      }
+    }
+  ;
+
+command
+  : "import" STRINGV                    { fn(ctx) { (Import($2), ctx) } }
+  | term                                { fn(ctx) { (Eval(FI($startpos, $endpos), $1!(ctx)), ctx) } }
+  | LCID binder                         { fn(ctx) { (Bind(FI($startpos, $endpos), $1, $2!(ctx)), ctx.add_name($1)) } }
+  ;
+
+binder
+  : "=" term                            { fn(ctx) { TmAbb($2!(ctx), None) } }
+  | ":" type                            { fn(ctx) { Var($2(ctx)) } }
+  ;
+
+term
+  : app_term                            { $1 }
+  | "if" term "then" term "else" term   { fn(ctx) { If(FI($startpos, $endpos), $2!(ctx), $4!(ctx), $6!(ctx)) } }
+  | "lambda" LCID ":" type "." term     {
+      fn(ctx) {
+        let ctx1 = ctx.add_name($2)
+        Abs(FI($startpos, $endpos), $2, $4(ctx), $6!(ctx1))
+      }
+    }
+  | "lambda" "_" ":" type "." term      {
+      fn(ctx) {
+        let ctx1 = ctx.add_name("_")
+        Abs(FI($startpos, $endpos), "_", $4(ctx), $6!(ctx1))
+      }
+    }
+  | "try" term "with" term              { fn(ctx) { Try(FI($startpos, $endpos), $2!(ctx), $4!(ctx)) } }
+  ;
+
+app_term
+  : atom_term                           { $1 }
+  | "succ" atom_term                    { fn(ctx) { Succ(FI($startpos, $endpos), $2!(ctx)) } }
+  | "pred" atom_term                    { fn(ctx) { Pred(FI($startpos, $endpos), $2!(ctx)) } }
+  | "iszero" atom_term                  { fn(ctx) { IsZero(FI($startpos, $endpos), $2!(ctx)) } }
+  | app_term atom_term                  { fn(ctx) { App(FI($startpos, $endpos), $1!(ctx), $2!(ctx)) } }
+  ;
+
+atom_term
+  : "(" term ")"                        { $2 }
+  | "true"                              { fn(_) { True(FI($startpos, $endpos)) } }
+  | "false"                             { fn(_) { False(FI($startpos, $endpos)) } }
+  | INTV                                {
+      fn(_) {
+        let info = FI($startpos, $endpos)
+        loop ($1, Zero(info)) {
+          (0, acc) => break acc
+          (n, acc) => continue (n - 1, Succ(info, acc))
+        }
+      }
+    }
+  | LCID                                { fn(ctx) { Var(FI($startpos, $endpos), ctx.name_to_index!($1, FI($startpos, $endpos)), ctx.length()) } }
+  | "error"                             { fn(_) { Error(FI($startpos, $endpos)) } }
+  ;
+
+type
+  : atom_type                           { $1 }
+  | atom_type "->" type                 { fn(ctx) { Arr($1(ctx), $3(ctx)) } }
+  ;
+
+atom_type
+  : "(" type ")"                        { $2 }
+  | "Bool"                              { fn(_) { Bool } }
+  | "Nat"                               { fn(_) { Nat } }
+  | "Top"                               { fn(_) { Top } }
+  | "Bot"                               { fn(_) { Bot } }
+  ;
