@@ -1,0 +1,19 @@
+{
+  "is-main": true,
+  "import": [
+    "moonbitlang/x/fs",
+    "moonbitlang/x/sys"
+  ],
+  "pre-build": [
+    {
+      "command": "node $mod_dir/.mooncakes/moonbitlang/yacc/boot/moonyacc.js $input -o $output",
+      "input": "parser.mbty",
+      "output": "parser.mbt"
+    },
+    {
+      "command": "node $mod_dir/.mooncakes/moonbitlang/yacc/boot/moonlex.js $input -o $output",
+      "input": "lexer.mbtx",
+      "output": "lexer.mbt"
+    }
+  ]
+}
