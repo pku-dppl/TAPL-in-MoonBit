@@ -297,8 +297,8 @@ fn Binding::shift(self : Binding, d : Int) -> Binding {
 fn Binding::to_string(self : Binding, ctx : Context) -> String {
   match self {
     Name => "/"
-    TmAbb(t, Some(ty)) => "= \{t.to_string(ctx)}\n  : \{ty}"
+    TmAbb(t, Some(ty)) => "= \{t.to_string(ctx)}\n  : \{ty.to_string()}"
     TmAbb(_, None) => panic()
-    Var(ty) => ": \{ty}"
+    Var(ty) => ": \{ty.to_string()}"
   }
 }

@@ -695,8 +695,8 @@ fn Binding::to_string(self : Binding, ctx : Context) -> String {
     TmAbb(t, Some(ty)) => "= \{t.to_string(ctx)}\n  : \{ty.to_string(ctx)}"
     TmAbb(_, None) => panic()
     Var(ty) => ": \{ty.to_string(ctx)}"
-    TyAbb(ty, Some(kd)) => "= \{ty.to_string(ctx)}\n  :: \{kd}"
+    TyAbb(ty, Some(kd)) => "= \{ty.to_string(ctx)}\n  :: \{kd.to_string()}"
     TyAbb(_, None) => panic()
-    TyVar(kd) => ":: \{kd}"
+    TyVar(kd) => ":: \{kd.to_string()}"
   }
 }

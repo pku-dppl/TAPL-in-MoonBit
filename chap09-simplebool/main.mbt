@@ -8,7 +8,7 @@ fn process_command!(ctx : Context, cmd : Command) -> Context {
     Eval(_, t) => {
       let ty = t.derive_type!(ctx)
       let t_prime = t.eval(ctx)
-      println("\{t_prime.to_string(ctx)}\n  : \{ty}")
+      println("\{t_prime.to_string(ctx)}\n  : \{ty.to_string()}")
       ctx
     }
     Bind(info, x, bind) => {

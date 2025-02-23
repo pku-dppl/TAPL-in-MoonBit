@@ -14,7 +14,9 @@ fn process_command!(
       let ty = t.recon_type!(ctx, uvar_gen, constr)
       constr.unify!("could not simplify constraints", info)
       let t_prime = t.eval(ctx)
-      println("\{t_prime.to_string(ctx)}\n  : \{ty.subst_constr(constr)}")
+      println(
+        "\{t_prime.to_string(ctx)}\n  : \{ty.subst_constr(constr).to_string()}",
+      )
       ctx
     }
     Bind(info, x, bind) => {
