@@ -51,7 +51,7 @@ fn process_file!(
 ///|
 fn parse_file!(ctx : Context, fname : String) -> @immut/list.T[Command] {
   try {
-    let code = @fs.read_file_to_string!(path=fname)
+    let code = @fs.read_file_to_string!(fname)
     let lexer = new_lexer(code)
     reset_lex(fname)
     let tokens = []
@@ -70,7 +70,7 @@ fn parse_file!(ctx : Context, fname : String) -> @immut/list.T[Command] {
       result!(ctx).0
     }
   } catch {
-    @fs.NotFound(_) => error_info!("cannot locate file \"\{fname}\"")
+    @fs.IOError(_) => error_info!("cannot locate file \"\{fname}\"")
     ErrorWithInfo(_) as e => raise e
     UnexpectedToken(t, (start, end), _) =>
       if has_lex_error.val {
