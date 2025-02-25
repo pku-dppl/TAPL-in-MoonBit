@@ -2,8 +2,8 @@
   "name": "TAPL",
   "version": "1.0.0",
   "deps": {
-    "moonbitlang/x": "0.4.18",
-    "moonbitlang/yacc": "0.2.2"
+    "moonbitlang/x": "0.4.20",
+    "moonbitlang/yacc": "0.2.8"
   },
   "license": "MIT",
   "source": ".",
