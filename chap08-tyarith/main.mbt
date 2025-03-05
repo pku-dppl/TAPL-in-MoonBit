@@ -8,7 +8,7 @@ fn process_command!(cmd : Command) -> Unit {
     Eval(_, t) => {
       let ty = t.derive_type!()
       let t_prime = t.eval()
-      println("\{t_prime}\n  : \{ty}")
+      println("\{t_prime.to_string()}\n  : \{ty}")
     }
   }
 }
@@ -33,7 +33,7 @@ fn process_file!(fname : String) -> Unit {
 ///|
 fn parse_file!(fname : String) -> @immut/list.T[Command] {
   try {
-    let code = @fs.read_file_to_string!(path=fname)
+    let code = @fs.read_file_to_string!(fname)
     let lexer = new_lexer(code)
     reset_lex(fname)
     let tokens = []
@@ -52,7 +52,7 @@ fn parse_file!(fname : String) -> @immut/list.T[Command] {
       result
     }
   } catch {
-    @fs.NotFound(_) => error_info!("cannot locate file \"\{fname}\"")
+    @fs.IOError(_) => error_info!("cannot locate file \"\{fname}\"")
     ErrorWithInfo(_) as e => raise e
     UnexpectedToken(t, (start, end), _) =>
       if has_lex_error.val {

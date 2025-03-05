@@ -1,4 +1,5 @@
 target/
 .mooncakes/
 parser.mbt
+parser.mbt.map.json
 lexer.mbt
