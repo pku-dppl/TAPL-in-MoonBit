@@ -67,7 +67,7 @@ rule token() -> (Token, Position, Position) {
     "Nat" as t => { (UNAT, newpos($startpos(t)), newpos($endpos(t))) }
     "Ref" as t => { (UREF, newpos($startpos(t)), newpos($endpos(t))) }
     "Unit" as t => { (UUNIT, newpos($startpos(t)), newpos($endpos(t))) }
-    (['a'-'z' '_'] ['A'-'Z' 'a'-'z' '_' '0'-'9' ''']*) as t => { (LCID(t), newpos($startpos(t)), newpos($endpos(t))) }
+    (['a'-'z' '_'] ['A'-'Z' 'a'-'z' '_' '0'-'9' '\'']*) as t => { (LCID(t), newpos($startpos(t)), newpos($endpos(t))) }
     "->" as t => { (ARROW, newpos($startpos(t)), newpos($endpos(t))) }
     ":=" as t => { (COLONEQ, newpos($startpos(t)), newpos($endpos(t))) }
     "!" as t => { (BANG, newpos($startpos(t)), newpos($endpos(t))) }

@@ -67,7 +67,7 @@ rule token() -> (Token, Position, Position) {
     "Bot" as t => { (UBOT, newpos($startpos(t)), newpos($endpos(t))) }
     "Nat" as t => { (UNAT, newpos($startpos(t)), newpos($endpos(t))) }
     "Top" as t => { (UTOP, newpos($startpos(t)), newpos($endpos(t))) }
-    (['a'-'z' '_'] ['A'-'Z' 'a'-'z' '_' '0'-'9' ''']*) as t => { (LCID(t), newpos($startpos(t)), newpos($endpos(t))) }
+    (['a'-'z' '_'] ['A'-'Z' 'a'-'z' '_' '0'-'9' '\'']*) as t => { (LCID(t), newpos($startpos(t)), newpos($endpos(t))) }
     "->" as t => { (ARROW, newpos($startpos(t)), newpos($endpos(t))) }
     ":" as t => { (COLON, newpos($startpos(t)), newpos($endpos(t))) }
     "." as t => { (DOT, newpos($startpos(t)), newpos($endpos(t))) }
