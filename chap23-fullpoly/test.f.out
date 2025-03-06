@@ -1,0 +1,214 @@
+true
+  : Bool
+false
+  : Bool
+42
+  : Nat
+1
+  : Nat
+false
+  : Bool
+x : Bool
+x
+  : Bool
+lambda x':Bool. x'
+  : Bool -> Bool
+true
+  : Bool
+id = lambda x':Bool. x'
+  : Bool -> Bool
+true
+  : Bool
+CBool = Nat -> Nat -> Nat
+tru = lambda t:Nat. lambda f:Nat. t
+  : CBool
+fls = lambda t:Nat. lambda f:Nat. f
+  : CBool
+test = lambda l:CBool. lambda m:Nat. lambda n:Nat. l m n
+  : CBool -> Nat -> Nat -> Nat
+33
+  : Nat
+CPair = CBool -> Nat
+pair = lambda f:Nat. lambda s:Nat. (lambda b:CBool. b f s) as CPair
+  : Nat -> Nat -> CPair
+fst = lambda p:CPair. p tru
+  : CPair -> Nat
+snd = lambda p:CPair. p fls
+  : CPair -> Nat
+33
+  : Nat
+CNat = (Nat -> Nat) -> Nat -> Nat
+c0 = lambda s:Nat->Nat. lambda z:Nat. z
+  : CNat
+c1 = lambda s:Nat->Nat. lambda z:Nat. s z
+  : CNat
+c2 = lambda s:Nat->Nat. lambda z:Nat. s (s z)
+  : CNat
+c3 = lambda s:Nat->Nat. lambda z:Nat. s (s (s z))
+  : CNat
+scc = lambda n:CNat. (lambda s:Nat->Nat. lambda z:Nat. s (n s z)) as CNat
+  : CNat -> CNat
+lambda s:Nat->Nat. lambda z:Nat. s ((lambda s':Nat->Nat. lambda z':Nat. s' z') s z)
+  : CNat
+plus = lambda m:CNat. lambda n:CNat. (lambda s:Nat->Nat. lambda z:Nat. m s (n s z)) as CNat
+  : CNat -> CNat -> CNat
+lambda s:Nat->Nat. lambda z:Nat. (lambda s':Nat->Nat. lambda z':Nat. s' (s' z')) s ((lambda s':Nat->Nat. lambda z':Nat. s' (s' z')) s z)
+  : CNat
+realnat = lambda m:CNat. m (lambda x':Nat. (succ x')) 0
+  : CNat -> Nat
+3
+  : Nat
+4
+  : Nat
+lambda x':A. x'
+  : A -> A
+lambda x':B. x'
+  : B -> B
+lambda f:A->A. lambda x':A. f (f x')
+  : (A -> A) -> A -> A
+unit
+  : Unit
+42
+  : Nat
+UU = Unit -> Unit
+unit
+  : Unit
+lambda f:Unit->Unit. f
+  : UU -> UU
+{3, false}
+  : {Nat, Bool}
+3
+  : Nat
+4
+  : Nat
+{partno=55, cost=30}
+  : {partno:Nat, cost:Nat}
+{cost=30, partno=55}
+  : {cost:Nat, partno:Nat}
+PhysicalAddr = {firstlast:String, addr:String}
+VirtualAddr = {name:String, email:String}
+pa = {firstlast="AC", addr="EG"}
+  : {firstlast:String, addr:String}
+va = {name="AC", email="AC@edu"}
+  : {name:String, email:String}
+Addr = <physical:PhysicalAddr, virtual:VirtualAddr>
+a = <physical={firstlast="AC", addr="EG"}> as Addr
+  : Addr
+getName = lambda a':Addr. case a' of <physical=x'>==>x'.firstlast | <virtual=y>==>y.name
+  : Addr -> String
+equal = lambda x':Nat. lambda y:Nat. if iszero x' then if iszero y then true elsefalse elseif iszero y then false elsefix (lambda eq:Nat->Nat->Bool. lambda x'':Nat. lambda y':Nat. if iszero x'' then if iszero y' then true elsefalse elseif iszero y' then false elseeq (pred x'') (pred y')) (pred x') (pred y)
+  : Nat -> Nat -> Bool
+OptionNat = <none:Unit, some:Nat>
+Table = Nat -> OptionNat
+emptyTable = lambda n:Nat. <none=unit> as OptionNat
+  : Nat -> OptionNat
+extendTable = lambda t:Table. lambda m:Nat. lambda v:Nat. (lambda n:Nat. if equal n m then <some=v> as OptionNat elset n) as Table
+  : Table -> Nat -> Nat -> Table
+Weekday = <monday:Unit, tuesday:Unit, wednesday:Unit, thursday:Unit, friday:Unit>
+nextBusinessDay = lambda w:Weekday. case w of <monday=x'>==><tuesday=unit> as Weekday | <tuesday=x'>==><wednesday=unit> as Weekday | <wednesday=x'>==><thursday=unit> as Weekday | <thursday=x'>==><friday=unit> as Weekday | <friday=x'>==><monday=unit> as Weekday
+  : Weekday -> Weekday
+<tuesday=unit> as Weekday
+  : Weekday
+<monday=unit> as Weekday
+  : Weekday
+DollarAmount = <dollars:Double>
+EuroAmount = <euros:Double>
+dollars2euros = lambda d:DollarAmount. case d of <dollars=x'>==><euros=timesdouble x' 1.1325> as EuroAmount
+  : DollarAmount -> EuroAmount
+euros2dollars = lambda e:EuroAmount. case e of <euros=x'>==><dollars=timesdouble x' 0.883> as DollarAmount
+  : EuroAmount -> DollarAmount
+mybankbalance = <dollars=39.5> as DollarAmount
+  : DollarAmount
+<dollars=39.49990125> as DollarAmount
+  : DollarAmount
+ff = lambda ie:Nat->Bool. lambda x':Nat. if iszero x' then true elseif iszero (pred x') then false elseie (pred (pred x'))
+  : (Nat -> Bool) -> Nat -> Bool
+iseven = lambda x':Nat. if iszero x' then true elseif iszero (pred x') then false elsefix (lambda ie:Nat->Bool. lambda x'':Nat. if iszero x'' then true elseif iszero (pred x'') then false elseie (pred (pred x''))) (pred (pred x'))
+  : Nat -> Bool
+false
+  : Bool
+ff = lambda ieio:{iseven:Nat->Bool,isodd:Nat->Bool}. {iseven=lambda x':Nat. if iszero x' then true elseieio.isodd (pred x'), isodd=lambda x':Nat. if iszero x' then false elseieio.iseven (pred x')}
+  : {iseven:Nat->Bool, isodd:Nat->Bool} -> {iseven:Nat->Bool, isodd:Nat->Bool}
+r = {iseven=lambda x':Nat. if iszero x' then true else(fix (lambda ieio:{iseven:Nat->Bool,isodd:Nat->Bool}. {iseven=lambda x'':Nat. if iszero x'' then true elseieio.isodd (pred x''), isodd=lambda x'':Nat. if iszero x'' then false elseieio.iseven (pred x'')})).isodd (pred x'), isodd=lambda x':Nat. if iszero x' then false else(fix (lambda ieio:{iseven:Nat->Bool,isodd:Nat->Bool}. {iseven=lambda x'':Nat. if iszero x'' then true elseieio.isodd (pred x''), isodd=lambda x'':Nat. if iszero x'' then false elseieio.iseven (pred x'')})).iseven (pred x')}
+  : {iseven:Nat->Bool, isodd:Nat->Bool}
+iseven = lambda x':Nat. if iszero x' then true else(fix (lambda ieio:{iseven:Nat->Bool,isodd:Nat->Bool}. {iseven=lambda x'':Nat. if iszero x'' then true elseieio.isodd (pred x''), isodd=lambda x'':Nat. if iszero x'' then false elseieio.iseven (pred x'')})).isodd (pred x')
+  : Nat -> Bool
+false
+  : Bool
+diverge = lambda _:Unit. fix (lambda x':T. x')
+  : Unit -> T
+lambda X. lambda x':X. x'
+  : All X. X -> X
+lambda x':All X. X->X. x'
+  : (All X. X -> X) -> (All X. X -> X)
+{*All Y. Y, lambda x':All Y. Y. x'} as {Some X, X->X}
+  : {Some X, X->X}
+{*Nat, {c=0, f=lambda x':Nat. (succ x')}} as {Some X, {c:X,f:X->Nat}}
+  : {Some X, {c:X,f:X->Nat}}
+X :: *
+ops = {c=0, f=lambda x':Nat. (succ x')}
+  : {c:X, f:X->Nat}
+1
+  : Nat
+id = lambda X'. lambda x':X'. x'
+  : All X'. X' -> X'
+lambda x':Nat. x'
+  : Nat -> Nat
+0
+  : Nat
+double = lambda X'. lambda f:X'->X'. lambda a':X'. f (f a')
+  : All X'. (X' -> X') -> X' -> X'
+doubleNat = lambda f:Nat->Nat. lambda a':Nat. f (f a')
+  : (Nat -> Nat) -> Nat -> Nat
+doubleNatArrowNat = lambda f:(Nat->Nat)->Nat->Nat. lambda a':Nat->Nat. f (f a')
+  : ((Nat -> Nat) -> Nat -> Nat) -> (Nat -> Nat) -> Nat -> Nat
+7
+  : Nat
+selfApp = lambda x':All X'. X'->X'. x' [All X'. X'->X'] x'
+  : (All X'. X' -> X') -> (All X'. X' -> X')
+quadruple = lambda X'. double [X'->X'] (double [X'])
+  : All X'. (X' -> X') -> X' -> X'
+CBool = All X'. X' -> X' -> X'
+tru = lambda X'. lambda t:X'. lambda f:X'. t
+  : All X'. X' -> X' -> X'
+fls = lambda X'. lambda t:X'. lambda f:X'. f
+  : All X'. X' -> X' -> X'
+not = lambda b:CBool. lambda X'. lambda t:X'. lambda f:X'. b [X'] f t
+  : CBool -> (All X'. X' -> X' -> X')
+CNat = All X'. (X' -> X') -> X' -> X'
+c0 = lambda X'. lambda s:X'->X'. lambda z:X'. z
+  : All X'. (X' -> X') -> X' -> X'
+c1 = lambda X'. lambda s:X'->X'. lambda z:X'. s z
+  : All X'. (X' -> X') -> X' -> X'
+c2 = lambda X'. lambda s:X'->X'. lambda z:X'. s (s z)
+  : All X'. (X' -> X') -> X' -> X'
+csucc = lambda n:CNat. lambda X'. lambda s:X'->X'. lambda z:X'. s (n [X'] s z)
+  : CNat -> (All X'. (X' -> X') -> X' -> X')
+cplus = lambda m:CNat. lambda n:CNat. m [CNat] csucc n
+  : CNat -> CNat -> CNat
+cnat2nat = lambda n:CNat. n [Nat] (lambda x':Nat. (succ x')) 0
+  : CNat -> Nat
+3
+  : Nat
+ctimes = lambda m:CNat. lambda n:CNat. lambda X'. lambda s:X'->X'. n [X'] (m [X'] s)
+  : CNat -> CNat -> (All X'. (X' -> X') -> X' -> X')
+cexp = lambda m:CNat. lambda n:CNat. lambda X'. n [X'->X'] (m [X'])
+  : CNat -> CNat -> (All X'. (X' -> X') -> X' -> X')
+6
+  : Nat
+8
+  : Nat
+PairNat = All X'. (CNat -> CNat -> X') -> X'
+counterADT = {*Nat, {new=1, get=lambda i:Nat. i, _inc=lambda i:Nat. (succ i)}} as {Some Counter, {new:Counter,get:Counter->Nat,_inc:Counter->Counter}}
+  : {Some Counter, {new:Counter,get:Counter->Nat,_inc:Counter->Counter}}
+2
+  : Nat
+Counter = {Some X', {state:X',methods:{get:X'->Nat,_inc:X'->X'}}}
+c = {*Nat, {state=5, methods={get=lambda x':Nat. x', _inc=lambda x':Nat. (succ x')}}} as Counter
+  : Counter
+5
+  : Nat
+sendget = lambda c':Counter. let {X',body} = c' in body.methods.get body.state
+  : Counter -> Nat
+sendinc = lambda c':Counter. let {X',body} = c' in {*X', {state=body.methods._inc body.state, methods=body.methods}} as Counter
+  : Counter -> Counter

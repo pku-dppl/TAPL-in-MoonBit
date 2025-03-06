@@ -1,0 +1,48 @@
+true
+false
+42
+1
+false
+x /
+x
+lambda x'. x'
+lambda x'. x' x'
+id = lambda x'. x'
+lambda z. id z
+tru = lambda t. lambda f. t
+fls = lambda t. lambda f. f
+test = lambda l. lambda m. lambda n. l m n
+33
+and = lambda b. lambda c. b c fls
+lambda t. lambda f. t
+lambda t. lambda f. f
+pair = lambda f. lambda s. lambda b. b f s
+fst = lambda p. p tru
+snd = lambda p. p fls
+33
+c0 = lambda s. lambda z. z
+c1 = lambda s. lambda z. s z
+c2 = lambda s. lambda z. s (s z)
+c3 = lambda s. lambda z. s (s (s z))
+scc = lambda n. lambda s. lambda z. s (n s z)
+lambda s. lambda z. s ((lambda s'. lambda z'. s' z') s z)
+plus = lambda m. lambda n. lambda s. lambda z. m s (n s z)
+times = lambda m. lambda n. m (plus n) c0
+lambda s. lambda z. (lambda s'. lambda z'. s' (s' z')) s ((lambda s'. lambda z'. (lambda s''. lambda z''. s'' (s'' z'')) s' ((lambda s''. lambda z''. z'') s' z')) s z)
+iszro = lambda m. m (lambda _. fls) tru
+lambda t. lambda f. f
+lambda t. lambda f. t
+zz = lambda b. b (lambda s. lambda z. z) (lambda s. lambda z. z)
+ss = lambda p. pair (snd p) (plus c1 (snd p))
+prd = lambda m. fst (m ss zz)
+realbool = lambda b. b true false
+true
+churchbool = lambda b. if b then tru elsefls
+realnat = lambda m. m (lambda x'. (succ x')) 0
+3
+4
+fix = lambda f. (lambda x'. f (lambda y. x' x' y)) (lambda x'. f (lambda y. x' x' y))
+g = lambda fct. lambda n. if realbool (iszro n) then c1 elsetimes n (fct (prd n))
+factorial = lambda n. if realbool (iszro n) then c1 elsetimes n ((lambda y. (lambda x'. (lambda fct. lambda n'. if realbool (iszro n') then c1 elsetimes n' (fct (prd n'))) (lambda y'. x' x' y')) (lambda x'. (lambda fct. lambda n'. if realbool (iszro n') then c1 elsetimes n' (fct (prd n'))) (lambda y'. x' x' y')) y) (prd n))
+6
+120

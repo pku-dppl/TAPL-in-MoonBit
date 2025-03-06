@@ -1,0 +1,95 @@
+true
+  : Bool
+false
+  : Bool
+42
+  : Nat
+1
+  : Nat
+false
+  : Bool
+x : Bool
+x
+  : Bool
+lambda x':Bool. x'
+  : Bool -> Bool
+true
+  : Bool
+id = lambda x':Bool. x'
+  : Bool -> Bool
+true
+  : Bool
+tru = lambda t:Nat. lambda f:Nat. t
+  : Nat -> Nat -> Nat
+fls = lambda t:Nat. lambda f:Nat. f
+  : Nat -> Nat -> Nat
+test = lambda l:Nat->Nat->Nat. lambda m:Nat. lambda n:Nat. l m n
+  : (Nat -> Nat -> Nat) -> Nat -> Nat -> Nat
+33
+  : Nat
+pair = lambda f:Nat. lambda s:Nat. lambda b:Nat->Nat->Nat. b f s
+  : Nat -> Nat -> (Nat -> Nat -> Nat) -> Nat
+fst = lambda p:(Nat->Nat->Nat)->Nat. p tru
+  : ((Nat -> Nat -> Nat) -> Nat) -> Nat
+snd = lambda p:(Nat->Nat->Nat)->Nat. p fls
+  : ((Nat -> Nat -> Nat) -> Nat) -> Nat
+33
+  : Nat
+c0 = lambda s:Nat->Nat. lambda z:Nat. z
+  : (Nat -> Nat) -> Nat -> Nat
+c1 = lambda s:Nat->Nat. lambda z:Nat. s z
+  : (Nat -> Nat) -> Nat -> Nat
+c2 = lambda s:Nat->Nat. lambda z:Nat. s (s z)
+  : (Nat -> Nat) -> Nat -> Nat
+c3 = lambda s:Nat->Nat. lambda z:Nat. s (s (s z))
+  : (Nat -> Nat) -> Nat -> Nat
+scc = lambda n:(Nat->Nat)->Nat->Nat. lambda s:Nat->Nat. lambda z:Nat. s (n s z)
+  : ((Nat -> Nat) -> Nat -> Nat) -> (Nat -> Nat) -> Nat -> Nat
+lambda s:Nat->Nat. lambda z:Nat. s ((lambda s':Nat->Nat. lambda z':Nat. s' z') s z)
+  : (Nat -> Nat) -> Nat -> Nat
+plus = lambda m:(Nat->Nat)->Nat->Nat. lambda n:(Nat->Nat)->Nat->Nat. lambda s:Nat->Nat. lambda z:Nat. m s (n s z)
+  : ((Nat -> Nat) -> Nat -> Nat) -> ((Nat -> Nat) -> Nat -> Nat) -> (Nat -> Nat) -> Nat -> Nat
+lambda s:Nat->Nat. lambda z:Nat. (lambda s':Nat->Nat. lambda z':Nat. s' (s' z')) s ((lambda s':Nat->Nat. lambda z':Nat. s' (s' z')) s z)
+  : (Nat -> Nat) -> Nat -> Nat
+realnat = lambda m:(Nat->Nat)->Nat->Nat. m (lambda x':Nat. (succ x')) 0
+  : ((Nat -> Nat) -> Nat -> Nat) -> Nat
+3
+  : Nat
+4
+  : Nat
+{3, false}
+  : {Nat, Bool}
+3
+  : Nat
+4
+  : Nat
+t1 = {partno=55, cost=30}
+  : {partno:Nat, cost:Nat}
+t2 = {cost=30, partno=55}
+  : {cost:Nat, partno:Nat}
+ft = lambda x':{partno:Nat,cost:Nat}. x'.cost
+  : {partno:Nat, cost:Nat} -> Nat
+30
+  : Nat
+30
+  : Nat
+123
+  : Nat
+{x=true, y=false}
+  : {x:Bool, y:Bool}
+true
+  : Bool
+{true, false}
+  : {Bool, Bool}
+true
+  : Bool
+{x=true, y=false, a=false}
+  : {x:Top, y:Bool}
+lambda x':Top. x'
+  : Top -> Top
+lambda x':Top. x'
+  : Top
+lambda x':Top. x'
+  : Top -> Top
+lambda z:Top. z
+  : Top

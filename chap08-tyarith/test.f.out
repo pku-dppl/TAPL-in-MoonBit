@@ -1,0 +1,10 @@
+true
+  : Bool
+false
+  : Bool
+42
+  : Nat
+1
+  : Nat
+false
+  : Bool
