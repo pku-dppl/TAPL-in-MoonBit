@@ -11,7 +11,7 @@
       "output": "parser.mbt"
     },
     {
-      "command": "node $mod_dir/.mooncakes/moonbitlang/yacc/boot/moonlex.js $input -o $output",
+      "command": "node $mod_dir/.mooncakes/moonbitlang/lex/boot/snapshot/moonlex.js $input -o $output",
       "input": "lexer.mbtx",
       "output": "lexer.mbt"
     }
