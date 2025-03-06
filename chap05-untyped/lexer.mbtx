@@ -60,7 +60,7 @@ rule token() -> (Token, Position, Position) {
     "succ" as t => { (SUCC, newpos($startpos(t)), newpos($endpos(t))) }
     "then" as t => { (THEN, newpos($startpos(t)), newpos($endpos(t))) }
     "true" as t => { (TRUE, newpos($startpos(t)), newpos($endpos(t))) }
-    (['a'-'z' '_'] ['A'-'Z' 'a'-'z' '_' '0'-'9' ''']*) as t => { (LCID(t), newpos($startpos(t)), newpos($endpos(t))) }
+    (['a'-'z' '_'] ['A'-'Z' 'a'-'z' '_' '0'-'9' '\'']*) as t => { (LCID(t), newpos($startpos(t)), newpos($endpos(t))) }
     "." as t => { (DOT, newpos($startpos(t)), newpos($endpos(t))) }
     "=" as t => { (EQ, newpos($startpos(t)), newpos($endpos(t))) }
     "(" as t => { (LPAREN, newpos($startpos(t)), newpos($endpos(t))) }

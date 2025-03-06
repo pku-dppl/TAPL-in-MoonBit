@@ -85,8 +85,8 @@ rule token() -> (Token, Position, Position) {
     "Some" as t => { (USOME, newpos($startpos(t)), newpos($endpos(t))) }
     "String" as t => { (USTRING, newpos($startpos(t)), newpos($endpos(t))) }
     "Unit" as t => { (UUNIT, newpos($startpos(t)), newpos($endpos(t))) }
-    (['a'-'z' '_'] ['A'-'Z' 'a'-'z' '_' '0'-'9' ''']*) as t => { (LCID(t), newpos($startpos(t)), newpos($endpos(t))) }
-    (['A'-'Z'] ['A'-'Z' 'a'-'z' '_' '0'-'9' ''']*) as t => { (UCID(t), newpos($startpos(t)), newpos($endpos(t))) }
+    (['a'-'z' '_'] ['A'-'Z' 'a'-'z' '_' '0'-'9' '\'']*) as t => { (LCID(t), newpos($startpos(t)), newpos($endpos(t))) }
+    (['A'-'Z'] ['A'-'Z' 'a'-'z' '_' '0'-'9' '\'']*) as t => { (UCID(t), newpos($startpos(t)), newpos($endpos(t))) }
     "==>" as t => { (DDARROW, newpos($startpos(t)), newpos($endpos(t))) }
     "->" as t => { (ARROW, newpos($startpos(t)), newpos($endpos(t))) }
     ":" as t => { (COLON, newpos($startpos(t)), newpos($endpos(t))) }
