@@ -5,6 +5,9 @@
     "moonbitlang/x": "0.4.21",
     "moonbitlang/yacc": "0.2.9"
   },
+  "bin-deps": {
+    "moonbitlang/lex": "0.3.2"
+  },
   "license": "MIT",
   "source": ".",
   "warn-list": "-6-7"

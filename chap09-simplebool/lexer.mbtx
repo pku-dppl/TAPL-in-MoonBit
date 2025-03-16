@@ -62,7 +62,7 @@ rule token() -> (Token, Position, Position) {
     "true" as t => { (TRUE, newpos($startpos(t)), newpos($endpos(t))) }
     "Bool" as t => { (UBOOL, newpos($startpos(t)), newpos($endpos(t))) }
     "Nat" as t => { (UNAT, newpos($startpos(t)), newpos($endpos(t))) }
-    (['a'-'z' '_'] ['A'-'Z' 'a'-'z' '_' '0'-'9' ''']*) as t => { (LCID(t), newpos($startpos(t)), newpos($endpos(t))) }
+    (['a'-'z' '_'] ['A'-'Z' 'a'-'z' '_' '0'-'9' '\'']*) as t => { (LCID(t), newpos($startpos(t)), newpos($endpos(t))) }
     "->" as t => { (ARROW, newpos($startpos(t)), newpos($endpos(t))) }
     ":" as t => { (COLON, newpos($startpos(t)), newpos($endpos(t))) }
     "." as t => { (DOT, newpos($startpos(t)), newpos($endpos(t))) }
@@ -93,7 +93,7 @@ rule comment() -> Unit {
 rule string() -> (Token, Position, Position) {
   parse {
     '"' as t => { (STRINGV(string_builder.to_string()), newpos(string_start.val), newpos($endpos(t))) }
-    '\x5c' => { string_builder.write_string("\x5c\x5c"); string(lexbuf) }
+    '\\' => { string_builder.write_string("\\\\"); string(lexbuf) }
     '\n' as t => { string_builder.write_string("\n"); newline($endpos(t)); string(lexbuf) }
     eof as t => {
       record_lex_error("string not terminated", newpos($startpos(t)), newpos($endpos(t)))
