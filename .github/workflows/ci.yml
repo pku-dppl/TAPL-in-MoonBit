@@ -1,0 +1,87 @@
+name: check
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  stable-check:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, macos-13]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+    continue-on-error: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: install
+        run: |
+          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
+          echo "$HOME/.moon/bin" >> $GITHUB_PATH
+
+      - name: moon version
+        run: |
+          moon version --all
+          moonrun --version
+
+      - name: moon check
+        run: moon check --deny-warn
+
+      - name: moon info
+        run: |
+          moon info --target wasm,wasm-gc,js,native
+          git diff --exit-code
+
+      - name: format diff
+        run: |
+          moon fmt --block-style
+          git diff --exit-code
+
+      - name: moon test
+        run: |
+          moon test --target all
+          moon test --release --target all
+          moon test --target native
+          moon test --target native --release
+
+  bleeding-check:
+    continue-on-error: true
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest, macos-13]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: install
+        run: |
+          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash -s bleeding
+          echo "$HOME/.moon/bin" >> $GITHUB_PATH
+
+      - name: moon version
+        run: |
+          moon version --all
+          moonrun --version
+
+      - name: moon check
+        run: moon check --deny-warn
+
+      - name: moon test
+        run: |
+          moon test --target all
+          moon test --release --target all
+          moon test --target native
+          moon test --target native --release
+
+      - name: moon info
+        run: |
+          moon info --target wasm,wasm-gc,js,native
+          git diff
+
+      - name: format diff
+        run: |
+          moon fmt
+          git diff

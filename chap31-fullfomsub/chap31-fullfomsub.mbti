@@ -1,0 +1,183 @@
+package TAPL/chap31-fullfomsub
+
+alias @moonbitlang/core/immut/list as @list
+
+// Values
+fn new_lexer(String) -> Lexer
+
+fn next_token(Lexer) -> (Token, Pos, Pos)
+
+fn run(LexEngine, Lexbuf) -> (Int, Array[(Int, Int)])
+
+fn toplevel(Array[(Token, Pos, Pos)], initial_pos? : Pos) -> ((Context) -> (@list.T[Command], Context)!)!ParseError
+
+// Types and methods
+type Binding
+
+type Command
+
+type Context
+
+type ErrorWithInfo
+
+type Info
+
+type Kind
+impl Eq for Kind
+
+pub(all) struct LexEngine {
+  graph : Array[(Int) -> (Int, Array[Array[Int]])]
+  end_nodes : Array[(Int, Array[((Int, Int), (Int, Int))])?]
+  start_tags : Array[Int]
+  code_blocks_n : Int
+}
+impl LexEngine {
+  run(Self, Lexbuf) -> (Int, Array[(Int, Int)])
+}
+
+type Lexbuf
+impl Lexbuf {
+  from_string(String) -> Self
+}
+
+pub(all) type Lexer Lexbuf
+impl Lexer {
+  next_token(Self) -> (Token, Pos, Pos)
+}
+
+type NoRuleApplies
+
+pub type! ParseError {
+  UnexpectedToken(Token, (Pos, Pos), Array[TokenKind])
+  UnexpectedEndOfInput(Pos, Array[TokenKind])
+}
+impl Show for ParseError
+
+type Pos
+
+type Term
+
+pub(all) enum Token {
+  EOF
+  AS
+  CASE
+  ELSE
+  FALSE
+  FIX
+  IF
+  IMPORT
+  IN
+  ISZERO
+  LAMBDA
+  LET
+  OF
+  PRED
+  SUCC
+  THEN
+  TIMESDOUBLE
+  TRUE
+  UNIT
+  UALL
+  UBOOL
+  UDOUBLE
+  UNAT
+  USOME
+  USTRING
+  UTOP
+  UUNIT
+  LCID(String)
+  UCID(String)
+  INTV(Int)
+  DOUBLEV(Double)
+  STRINGV(String)
+  DDARROW
+  ARROW
+  COLONCOLON
+  DARROW
+  LEQ
+  COLON
+  COMMA
+  DOT
+  EQ
+  GT
+  LCURLY
+  LPAREN
+  LSQUARE
+  LT
+  RCURLY
+  RPAREN
+  RSQUARE
+  SEMI
+  STAR
+  USCORE
+  VBAR
+}
+impl Token {
+  kind(Self) -> TokenKind
+}
+impl Show for Token
+
+pub(all) enum TokenKind {
+  TK_EOF
+  TK_AS
+  TK_CASE
+  TK_ELSE
+  TK_FALSE
+  TK_FIX
+  TK_IF
+  TK_IMPORT
+  TK_IN
+  TK_ISZERO
+  TK_LAMBDA
+  TK_LET
+  TK_OF
+  TK_PRED
+  TK_SUCC
+  TK_THEN
+  TK_TIMESDOUBLE
+  TK_TRUE
+  TK_UNIT
+  TK_UALL
+  TK_UBOOL
+  TK_UDOUBLE
+  TK_UNAT
+  TK_USOME
+  TK_USTRING
+  TK_UTOP
+  TK_UUNIT
+  TK_LCID
+  TK_UCID
+  TK_INTV
+  TK_DOUBLEV
+  TK_STRINGV
+  TK_DDARROW
+  TK_ARROW
+  TK_COLONCOLON
+  TK_DARROW
+  TK_LEQ
+  TK_COLON
+  TK_COMMA
+  TK_DOT
+  TK_EQ
+  TK_GT
+  TK_LCURLY
+  TK_LPAREN
+  TK_LSQUARE
+  TK_LT
+  TK_RCURLY
+  TK_RPAREN
+  TK_RSQUARE
+  TK_SEMI
+  TK_STAR
+  TK_USCORE
+  TK_VBAR
+}
+impl Show for TokenKind
+
+type Type
+
+// Type aliases
+pub typealias Position = Pos
+
+// Traits
+
