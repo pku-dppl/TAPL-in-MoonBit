@@ -1,6 +1,8 @@
-package TAPL/chap20-fullequirec
+package "TAPL/chap20-fullequirec"
 
-alias @moonbitlang/core/immut/list as @list
+import(
+  "moonbitlang/core/immut/list"
+)
 
 // Values
 fn new_lexer(String) -> Lexer

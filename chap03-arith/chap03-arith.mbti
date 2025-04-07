@@ -1,6 +1,8 @@
-package TAPL/chap03-arith
+package "TAPL/chap03-arith"
 
-alias @moonbitlang/core/immut/list as @list
+import(
+  "moonbitlang/core/immut/list"
+)
 
 // Values
 fn new_lexer(String) -> Lexer

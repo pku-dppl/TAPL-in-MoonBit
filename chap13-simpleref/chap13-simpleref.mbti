@@ -1,6 +1,8 @@
-package TAPL/chap13-simpleref
+package "TAPL/chap13-simpleref"
 
-alias @moonbitlang/core/immut/list as @list
+import(
+  "moonbitlang/core/immut/list"
+)
 
 // Values
 fn new_lexer(String) -> Lexer
