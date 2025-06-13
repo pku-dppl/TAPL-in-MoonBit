@@ -2,9 +2,9 @@
 let already_imported : Array[String] = []
 
 ///|
-fn process_command!(cmd : Command) -> Unit {
+fn process_command(cmd : Command) -> Unit raise {
   match cmd {
-    Import(fname) => process_file!(fname)
+    Import(fname) => process_file(fname)
     Eval(_, t) => {
       let t_prime = t.eval()
       println("\{t_prime.to_string()}")
@@ -13,16 +13,16 @@ fn process_command!(cmd : Command) -> Unit {
 }
 
 ///|
-fn process_file!(fname : String) -> Unit {
+fn process_file(fname : String) -> Unit raise {
   if already_imported.contains(fname) {
     ()
   } else {
     already_imported.push(fname)
-    let cmds = parse_file!(fname)
+    let cmds = parse_file(fname)
     loop cmds {
       Nil => break
       Cons(c, rest) => {
-        process_command!(c)
+        process_command(c)
         continue rest
       }
     }
@@ -30,9 +30,9 @@ fn process_file!(fname : String) -> Unit {
 }
 
 ///|
-fn parse_file!(fname : String) -> @immut/list.T[Command] {
+fn parse_file(fname : String) -> @immut/list.T[Command] raise {
   try {
-    let code = @fs.read_file_to_string!(fname)
+    let code = @fs.read_file_to_string(fname)
     let lexer = new_lexer(code)
     reset_lex(fname)
     let tokens = []
@@ -44,20 +44,20 @@ fn parse_file!(fname : String) -> @immut/list.T[Command] {
         _ => continue
       }
     }
-    let result = toplevel!(tokens)
+    let result = toplevel(tokens)
     if has_lex_error.val {
-      error_info!("")
+      error_info("")
     } else {
       result
     }
   } catch {
-    @fs.IOError(_) => error_info!("cannot locate file \"\{fname}\"")
+    @fs.IOError(_) => error_info("cannot locate file \"\{fname}\"")
     ErrorWithInfo(_) as e => raise e
     UnexpectedToken(t, (start, end), _) =>
       if has_lex_error.val {
-        error_info!("")
+        error_info("")
       } else {
-        error_info!("unexpected token \"\{t}\"", info=FI(start, end))
+        error_info("unexpected token \"\{t}\"", info=FI(start, end))
       }
     _ => panic()
   }
@@ -68,10 +68,10 @@ fn main {
   let argv = @sys.get_cli_args()[2:]
   try {
     if argv.length() != 1 {
-      error_info!("you must specify exactly one input file")
+      error_info("you must specify exactly one input file")
     } else {
       let fname = argv[0]
-      process_file!(fname)
+      process_file(fname)
     }
   } catch {
     ErrorWithInfo((msg, info)) =>

@@ -26,36 +26,36 @@ impl Show for Info with output(self, logger) {
 }
 
 ///|
-type! ErrorWithInfo (String, Info)
+suberror ErrorWithInfo (String, Info)
 
 ///|
-fn error_info![T](msg : String, info~ : Info = UNKNOWN) -> T {
+fn[T] error_info(msg : String, info~ : Info = UNKNOWN) -> T raise {
   raise ErrorWithInfo((msg, info))
 }
 
 ///|
-typealias ParseToplevel = (Context) -> (@immut/list.T[Command], Context)!Error
+typealias (Context) -> (@immut/list.T[Command], Context) raise Error as ParseToplevel
 
 ///|
-typealias ParseCommand = (Context) -> (Command, Context)!Error
+typealias (Context) -> (Command, Context) raise Error as ParseCommand
 
 ///|
-typealias ParseBinder = (Context) -> Binding!Error
+typealias (Context) -> Binding raise Error as ParseBinder
 
 ///|
-typealias ParseTerm = (Context) -> Term!Error
+typealias (Context) -> Term raise Error as ParseTerm
 
 ///|
-typealias ParseLabelTerms = (Context, Int) -> @immut/list.T[(String, Term)]!Error
+typealias (Context, Int) -> @immut/list.T[(String, Term)] raise Error as ParseLabelTerms
 
 ///|
-typealias ParseLabelTerm = (Context, Int) -> (String, Term)!Error
+typealias (Context, Int) -> (String, Term) raise Error as ParseLabelTerm
 
 ///|
-typealias ParseType = (Context) -> Type
+typealias (Context) -> Type as ParseType
 
 ///|
-typealias ParseLabelTypes = (Context, Int) -> @immut/list.T[(String, Type)]
+typealias (Context, Int) -> @immut/list.T[(String, Type)] as ParseLabelTypes
 
 ///|
-typealias ParseLabelType = (Context, Int) -> (String, Type)
+typealias (Context, Int) -> (String, Type) as ParseLabelType

@@ -44,8 +44,8 @@ toplevel
   : EOF                                 { fn(ctx) { (Nil, ctx) } }
   | command ";" toplevel                {
       fn(ctx) {
-        let (cmd, ctx1) = $1!(ctx)
-        let (cmds, ctx2) = $3!(ctx1)
+        let (cmd, ctx1) = $1(ctx)
+        let (cmds, ctx2) = $3(ctx1)
         (Cons(cmd, cmds), ctx2)
       }
     }
@@ -53,50 +53,50 @@ toplevel
 
 command
   : "import" STRINGV                    { fn(ctx) { (Import($2), ctx) } }
-  | term                                { fn(ctx) { (Eval(FI($startpos, $endpos), $1!(ctx)), ctx) } }
-  | LCID binder                         { fn(ctx) { (Bind(FI($startpos, $endpos), $1, $2!(ctx)), ctx.add_name($1)) } }
+  | term                                { fn(ctx) { (Eval(FI($startpos, $endpos), $1(ctx)), ctx) } }
+  | LCID binder                         { fn(ctx) { (Bind(FI($startpos, $endpos), $1, $2(ctx)), ctx.add_name($1)) } }
   ;
 
 binder
-  : "=" term                            { fn(ctx) { TmAbb($2!(ctx), None) } }
+  : "=" term                            { fn(ctx) { TmAbb($2(ctx), None) } }
   | ":" type                            { fn(ctx) { Var($2(ctx)) } }
   ;
 
 term
   : app_term                            { $1 }
-  | "if" term "then" term "else" term   { fn(ctx) { If(FI($startpos, $endpos), $2!(ctx), $4!(ctx), $6!(ctx)) } }
+  | "if" term "then" term "else" term   { fn(ctx) { If(FI($startpos, $endpos), $2(ctx), $4(ctx), $6(ctx)) } }
   | "lambda" LCID ":" type "." term     {
       fn(ctx) {
         let ctx1 = ctx.add_name($2)
-        Abs(FI($startpos, $endpos), $2, Some($4(ctx)), $6!(ctx1))
+        Abs(FI($startpos, $endpos), $2, Some($4(ctx)), $6(ctx1))
       }
     }
   | "lambda" "_" ":" type "." term      {
       fn(ctx) {
         let ctx1 = ctx.add_name("_")
-        Abs(FI($startpos, $endpos), "_", Some($4(ctx)), $6!(ctx1))
+        Abs(FI($startpos, $endpos), "_", Some($4(ctx)), $6(ctx1))
       }
     }
   | "lambda" LCID "." term              {
       fn(ctx) {
         let ctx1 = ctx.add_name($2)
-        Abs(FI($startpos, $endpos), $2, None, $4!(ctx1))
+        Abs(FI($startpos, $endpos), $2, None, $4(ctx1))
       }
     }
   | "lambda" "_" "." term               {
       fn(ctx) {
         let ctx1 = ctx.add_name("_")
-        Abs(FI($startpos, $endpos), "_", None, $4!(ctx1))
+        Abs(FI($startpos, $endpos), "_", None, $4(ctx1))
       }
     }
   ;
 
 app_term
   : atom_term                           { $1 }
-  | "succ" atom_term                    { fn(ctx) { Succ(FI($startpos, $endpos), $2!(ctx)) } }
-  | "pred" atom_term                    { fn(ctx) { Pred(FI($startpos, $endpos), $2!(ctx)) } }
-  | "iszero" atom_term                  { fn(ctx) { IsZero(FI($startpos, $endpos), $2!(ctx)) } }
-  | app_term atom_term                  { fn(ctx) { App(FI($startpos, $endpos), $1!(ctx), $2!(ctx)) } }
+  | "succ" atom_term                    { fn(ctx) { Succ(FI($startpos, $endpos), $2(ctx)) } }
+  | "pred" atom_term                    { fn(ctx) { Pred(FI($startpos, $endpos), $2(ctx)) } }
+  | "iszero" atom_term                  { fn(ctx) { IsZero(FI($startpos, $endpos), $2(ctx)) } }
+  | app_term atom_term                  { fn(ctx) { App(FI($startpos, $endpos), $1(ctx), $2(ctx)) } }
   ;
 
 atom_term
@@ -112,7 +112,7 @@ atom_term
         }
       }
     }
-  | LCID                                { fn(ctx) { Var(FI($startpos, $endpos), ctx.name_to_index!($1, FI($startpos, $endpos)), ctx.length()) } }
+  | LCID                                { fn(ctx) { Var(FI($startpos, $endpos), ctx.name_to_index($1, FI($startpos, $endpos)), ctx.length()) } }
   ;
 
 type

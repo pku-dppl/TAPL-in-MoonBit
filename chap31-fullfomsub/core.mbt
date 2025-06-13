@@ -25,10 +25,10 @@ fn is_val(self : Term) -> Bool {
 }
 
 ///|
-type! NoRuleApplies
+suberror NoRuleApplies
 
 ///|
-fn eval1(self : Term, ctx : Context) -> Term!NoRuleApplies {
+fn eval1(self : Term, ctx : Context) -> Term raise NoRuleApplies {
   match self {
     True(_) => raise NoRuleApplies
     False(_) => raise NoRuleApplies
@@ -40,7 +40,7 @@ fn eval1(self : Term, ctx : Context) -> Term!NoRuleApplies {
           _ => raise NoRuleApplies
         }
       } else {
-        let t1_prime = t1.eval1!(ctx)
+        let t1_prime = t1.eval1(ctx)
         If(info, t1_prime, t2, t3)
       }
     Zero(_) => raise NoRuleApplies
@@ -48,7 +48,7 @@ fn eval1(self : Term, ctx : Context) -> Term!NoRuleApplies {
       if t1.is_val() {
         raise NoRuleApplies
       } else {
-        let t1_prime = t1.eval1!(ctx)
+        let t1_prime = t1.eval1(ctx)
         Succ(info, t1_prime)
       }
     Pred(info, t1) =>
@@ -64,7 +64,7 @@ fn eval1(self : Term, ctx : Context) -> Term!NoRuleApplies {
           _ => raise NoRuleApplies
         }
       } else {
-        let t1_prime = t1.eval1!(ctx)
+        let t1_prime = t1.eval1(ctx)
         Pred(info, t1_prime)
       }
     IsZero(info, t1) =>
@@ -80,7 +80,7 @@ fn eval1(self : Term, ctx : Context) -> Term!NoRuleApplies {
           _ => raise NoRuleApplies
         }
       } else {
-        let t1_prime = t1.eval1!(ctx)
+        let t1_prime = t1.eval1(ctx)
         IsZero(info, t1_prime)
       }
     Var(_, x, _) =>
@@ -97,11 +97,11 @@ fn eval1(self : Term, ctx : Context) -> Term!NoRuleApplies {
             _ => raise NoRuleApplies
           }
         } else {
-          let t2_prime = t2.eval1!(ctx)
+          let t2_prime = t2.eval1(ctx)
           App(info, t1, t2_prime)
         }
       } else {
-        let t1_prime = t1.eval1!(ctx)
+        let t1_prime = t1.eval1(ctx)
         App(info, t1_prime, t2)
       }
     Unit(_) => raise NoRuleApplies
@@ -109,7 +109,7 @@ fn eval1(self : Term, ctx : Context) -> Term!NoRuleApplies {
       if t1.is_val() {
         t1
       } else {
-        let t1_prime = t1.eval1!(ctx)
+        let t1_prime = t1.eval1(ctx)
         Ascribe(info, t1_prime, ty1)
       }
     Record(info, lts) =>
@@ -119,7 +119,7 @@ fn eval1(self : Term, ctx : Context) -> Term!NoRuleApplies {
           if t.is_val() {
             continue (rest, Cons((l, t), acc))
           } else {
-            let t_prime = t.eval1!(ctx)
+            let t_prime = t.eval1(ctx)
             break Record(info, acc.rev_concat(Cons((l, t_prime), rest)))
           }
       }
@@ -134,14 +134,14 @@ fn eval1(self : Term, ctx : Context) -> Term!NoRuleApplies {
           _ => raise NoRuleApplies
         }
       } else {
-        let t1_prime = t1.eval1!(ctx)
+        let t1_prime = t1.eval1(ctx)
         Proj(info, t1_prime, l)
       }
     Tag(info, l, t1, ty) =>
       if t1.is_val() {
         raise NoRuleApplies
       } else {
-        let t1_prime = t1.eval1!(ctx)
+        let t1_prime = t1.eval1(ctx)
         Tag(info, l, t1_prime, ty)
       }
     Case(info, t1, cases) =>
@@ -155,7 +155,7 @@ fn eval1(self : Term, ctx : Context) -> Term!NoRuleApplies {
           _ => raise NoRuleApplies
         }
       } else {
-        let t1_prime = t1.eval1!(ctx)
+        let t1_prime = t1.eval1(ctx)
         Case(info, t1_prime, cases)
       }
     String(_) => raise NoRuleApplies
@@ -168,11 +168,11 @@ fn eval1(self : Term, ctx : Context) -> Term!NoRuleApplies {
             _ => raise NoRuleApplies
           }
         } else {
-          let t2_prime = t2.eval1!(ctx)
+          let t2_prime = t2.eval1(ctx)
           Timesdouble(info, t1, t2_prime)
         }
       } else {
-        let t1_prime = t1.eval1!(ctx)
+        let t1_prime = t1.eval1(ctx)
         Timesdouble(info, t1_prime, t2)
       }
     Fix(info, t1) =>
@@ -182,7 +182,7 @@ fn eval1(self : Term, ctx : Context) -> Term!NoRuleApplies {
           _ => raise NoRuleApplies
         }
       } else {
-        let t1_prime = t1.eval1!(ctx)
+        let t1_prime = t1.eval1(ctx)
         Fix(info, t1_prime)
       }
     TAbs(_) => raise NoRuleApplies
@@ -193,14 +193,14 @@ fn eval1(self : Term, ctx : Context) -> Term!NoRuleApplies {
           _ => raise NoRuleApplies
         }
       } else {
-        let t1_prime = t1.eval1!(ctx)
+        let t1_prime = t1.eval1(ctx)
         TApp(info, t1_prime, ty2)
       }
     Pack(info, ty1, t2, ty3) =>
       if t2.is_val() {
         raise NoRuleApplies
       } else {
-        let t2_prime = t2.eval1!(ctx)
+        let t2_prime = t2.eval1(ctx)
         Pack(info, ty1, t2_prime, ty3)
       }
     Unpack(info, x1, x2, t1, t2) =>
@@ -210,7 +210,7 @@ fn eval1(self : Term, ctx : Context) -> Term!NoRuleApplies {
           _ => raise NoRuleApplies
         }
       } else {
-        let t1_prime = t1.eval1!(ctx)
+        let t1_prime = t1.eval1(ctx)
         Unpack(info, x1, x2, t1_prime, t2)
       }
   }
@@ -221,7 +221,7 @@ fn eval(self : Term, ctx : Context) -> Term {
   loop self {
     t =>
       try {
-        continue t.eval1!(ctx)
+        continue t.eval1(ctx)
       } catch {
         NoRuleApplies => break t
       }
@@ -237,14 +237,14 @@ fn Kind::make_top(self : Kind) -> Type {
 }
 
 ///|
-fn Type::promote(self : Type, ctx : Context) -> Type!NoRuleApplies {
+fn Type::promote(self : Type, ctx : Context) -> Type raise NoRuleApplies {
   match self {
     Var(x, _) =>
       match ctx.get_binding(x) {
         TyVar(ty) => ty
         _ => raise NoRuleApplies
       }
-    App(ty1, ty2) => App(ty1.promote!(ctx), ty2)
+    App(ty1, ty2) => App(ty1.promote(ctx), ty2)
     _ => raise NoRuleApplies
   }
 }
@@ -252,15 +252,13 @@ fn Type::promote(self : Type, ctx : Context) -> Type!NoRuleApplies {
 ///|
 fn Type::lcst(self : Type, ctx : Context) -> Type {
   let ty = self.simplify(ctx)
-  try {
-    ty.promote!(ctx).lcst(ctx)
-  } catch {
+  ty.promote(ctx).lcst(ctx) catch {
     NoRuleApplies => ty
   }
 }
 
 ///|
-fn Type::compute(self : Type, ctx : Context) -> Type!NoRuleApplies {
+fn Type::compute(self : Type, ctx : Context) -> Type raise NoRuleApplies {
   match self {
     Bool => raise NoRuleApplies
     Nat => raise NoRuleApplies
@@ -298,7 +296,7 @@ fn Type::simplify(self : Type, ctx : Context) -> Type {
         _ => ty
       }
       try {
-        continue ty.compute!(ctx)
+        continue ty.compute(ctx)
       } catch {
         NoRuleApplies => break ty
       }
@@ -360,7 +358,7 @@ fn Type::subtype_of(self : Type, other : Type, ctx : Context) -> Bool {
     let ty2 = other.simplify(ctx)
     match (ty1, ty2) {
       (_, Top) => true
-      (Var(_), _) => ty1.promote?(ctx).unwrap().subtype_of(ty2, ctx)
+      (Var(_), _) => (try? ty1.promote(ctx)).unwrap().subtype_of(ty2, ctx)
       (Arr(ty11, ty12), Arr(ty21, ty22)) =>
         ty21.subtype_of(ty11, ctx) && ty12.subtype_of(ty22, ctx)
       (Record(ltys1), Record(ltys2)) =>
@@ -387,7 +385,7 @@ fn Type::subtype_of(self : Type, other : Type, ctx : Context) -> Bool {
         let ctx1 = ctx.add_binding(x1, TyVar(kd21.make_top()))
         kd21 == kd11 && ty12.subtype_of(ty22, ctx1)
       }
-      (App(_), _) => ty1.promote?(ctx).unwrap().subtype_of(ty2, ctx)
+      (App(_), _) => (try? ty1.promote(ctx)).unwrap().subtype_of(ty2, ctx)
       _ => false
     }
   }
@@ -404,9 +402,7 @@ fn Type::join(self : Type, other : Type, ctx : Context) -> Type {
     let ty2 = self.simplify(ctx)
     match (ty1, ty2) {
       (Arr(ty11, ty12), Arr(ty21, ty22)) =>
-        try {
-          Arr(ty11.meet!(ty21, ctx), ty12.join(ty22, ctx))
-        } catch {
+        Arr(ty11.meet(ty21, ctx), ty12.join(ty22, ctx)) catch {
           NoRuleApplies => Top
         }
       (Record(ltys1), Record(ltys2)) => {
@@ -442,7 +438,7 @@ fn Type::join(self : Type, other : Type, ctx : Context) -> Type {
       }
       (All(x1, ty11, ty12), All(_, ty21, ty22)) =>
         try {
-          let ty1 = ty11.meet!(ty21, ctx)
+          let ty1 = ty11.meet(ty21, ctx)
           All(x1, ty1, ty12.join(ty22, ctx.add_binding(x1, TyVar(ty1))))
         } catch {
           NoRuleApplies => Top
@@ -457,7 +453,11 @@ fn Type::join(self : Type, other : Type, ctx : Context) -> Type {
 }
 
 ///|
-fn Type::meet(self : Type, other : Type, ctx : Context) -> Type!NoRuleApplies {
+fn Type::meet(
+  self : Type,
+  other : Type,
+  ctx : Context
+) -> Type raise NoRuleApplies {
   if self.subtype_of(other, ctx) {
     self
   } else if other.subtype_of(self, ctx) {
@@ -467,7 +467,7 @@ fn Type::meet(self : Type, other : Type, ctx : Context) -> Type!NoRuleApplies {
     let ty2 = self.simplify(ctx)
     match (ty1, ty2) {
       (Arr(ty11, ty12), Arr(ty21, ty22)) =>
-        Arr(ty11.join(ty21, ctx), ty12.meet!(ty22, ctx))
+        Arr(ty11.join(ty21, ctx), ty12.meet(ty22, ctx))
       (Record(ltys1), Record(ltys2)) => {
         let labels1 = ltys1.map(fn(lty) { lty.0 })
         let labels2 = ltys2.map(fn(lty) { lty.0 })
@@ -478,7 +478,7 @@ fn Type::meet(self : Type, other : Type, ctx : Context) -> Type!NoRuleApplies {
           (Nil, acc) => break acc.rev()
           (Cons(l, rest), acc) => {
             let ty = match (ltys1.lookup(l), ltys2.lookup(l)) {
-              (Some(ty1), Some(ty2)) => ty1.meet!(ty2, ctx)
+              (Some(ty1), Some(ty2)) => ty1.meet(ty2, ctx)
               (Some(ty1), None) => ty1
               (None, Some(ty2)) => ty2
               (None, None) => panic()
@@ -497,18 +497,18 @@ fn Type::meet(self : Type, other : Type, ctx : Context) -> Type!NoRuleApplies {
           (Cons(l, rest), acc) => {
             let ty1 = ltys1.lookup(l).unwrap()
             let ty2 = ltys2.lookup(l).unwrap()
-            continue (rest, Cons((l, ty1.meet!(ty2, ctx)), acc))
+            continue (rest, Cons((l, ty1.meet(ty2, ctx)), acc))
           }
         }
         Variant(common_ltys)
       }
       (All(x1, ty11, ty12), All(_, ty21, ty22)) => {
         let ty1 = ty11.join(ty21, ctx)
-        All(x1, ty1, ty12.meet!(ty22, ctx.add_binding(x1, TyVar(ty1))))
+        All(x1, ty1, ty12.meet(ty22, ctx.add_binding(x1, TyVar(ty1))))
       }
       (Some(x1, ty11, ty12), Some(_, ty21, ty22)) => {
-        let ty1 = ty11.meet!(ty21, ctx)
-        Some(x1, ty1, ty12.meet!(ty22, ctx.add_binding(x1, TyVar(ty1))))
+        let ty1 = ty11.meet(ty21, ctx)
+        Some(x1, ty1, ty12.meet(ty22, ctx.add_binding(x1, TyVar(ty1))))
       }
       _ => raise NoRuleApplies
     }
@@ -516,70 +516,70 @@ fn Type::meet(self : Type, other : Type, ctx : Context) -> Type!NoRuleApplies {
 }
 
 ///|
-fn derive_type!(self : Term, ctx : Context) -> Type {
+fn derive_type(self : Term, ctx : Context) -> Type raise {
   match self {
     True(_) => Bool
     False(_) => Bool
     If(info, t1, t2, t3) =>
-      if t1.derive_type!(ctx).subtype_of(Bool, ctx) {
-        let ty2 = t2.derive_type!(ctx)
-        let ty3 = t3.derive_type!(ctx)
+      if t1.derive_type(ctx).subtype_of(Bool, ctx) {
+        let ty2 = t2.derive_type(ctx)
+        let ty3 = t3.derive_type(ctx)
         ty2.join(ty3, ctx)
       } else {
-        error_info!("guard of conditional not a boolean", info~)
+        error_info("guard of conditional not a boolean", info~)
       }
     Zero(_) => Nat
     Succ(info, t1) =>
-      if t1.derive_type!(ctx).subtype_of(Nat, ctx) {
+      if t1.derive_type(ctx).subtype_of(Nat, ctx) {
         Nat
       } else {
-        error_info!("argument of succ is not a number", info~)
+        error_info("argument of succ is not a number", info~)
       }
     Pred(info, t1) =>
-      if t1.derive_type!(ctx).subtype_of(Nat, ctx) {
+      if t1.derive_type(ctx).subtype_of(Nat, ctx) {
         Nat
       } else {
-        error_info!("argument of pred is not a number", info~)
+        error_info("argument of pred is not a number", info~)
       }
     IsZero(info, t1) =>
-      if t1.derive_type!(ctx).subtype_of(Nat, ctx) {
+      if t1.derive_type(ctx).subtype_of(Nat, ctx) {
         Bool
       } else {
-        error_info!("argument of iszero is not a number", info~)
+        error_info("argument of iszero is not a number", info~)
       }
     Var(_, x, _) => ctx.get_type(x)
     Abs(info, x, ty1, t2) => {
-      let kd1 = ty1.derive_kind!(ctx, info)
+      let kd1 = ty1.derive_kind(ctx, info)
       if kd1 != Star {
-        error_info!("star kind expected", info~)
+        error_info("star kind expected", info~)
       } else {
         let ctx1 = ctx.add_binding(x, Var(ty1))
-        let ty2 = t2.derive_type!(ctx1).shift(-1)
+        let ty2 = t2.derive_type(ctx1).shift(-1)
         Arr(ty1, ty2)
       }
     }
     App(info, t1, t2) => {
-      let ty1 = t1.derive_type!(ctx)
-      let ty2 = t2.derive_type!(ctx)
+      let ty1 = t1.derive_type(ctx)
+      let ty2 = t2.derive_type(ctx)
       match ty1.lcst(ctx) {
         Arr(ty11, ty12) =>
           if ty2.subtype_of(ty11, ctx) {
             ty12
           } else {
-            error_info!("parameter type mismatch", info~)
+            error_info("parameter type mismatch", info~)
           }
-        _ => error_info!("arrow type expected", info~)
+        _ => error_info("arrow type expected", info~)
       }
     }
     Unit(_) => Unit
     Ascribe(info, t1, ty2) => {
-      let kd2 = ty2.derive_kind!(ctx, info)
+      let kd2 = ty2.derive_kind(ctx, info)
       if kd2 != Star {
-        error_info!("star kind expected", info~)
-      } else if t1.derive_type!(ctx).subtype_of(ty2, ctx) {
+        error_info("star kind expected", info~)
+      } else if t1.derive_type(ctx).subtype_of(ty2, ctx) {
         ty2
       } else {
-        error_info!("body of as-term does not have the expected type", info~)
+        error_info("body of as-term does not have the expected type", info~)
       }
     }
     Record(info, lts) =>
@@ -587,40 +587,40 @@ fn derive_type!(self : Term, ctx : Context) -> Type {
         (Nil, acc) => break Record(acc.rev())
         (Cons((l, t), rest), acc) =>
           if acc.lookup(l).is_empty() {
-            continue (rest, Cons((l, t.derive_type!(ctx)), acc))
+            continue (rest, Cons((l, t.derive_type(ctx)), acc))
           } else {
-            error_info!("duplicate label \{l} is not allowed", info~)
+            error_info("duplicate label \{l} is not allowed", info~)
           }
       }
     Proj(info, t1, l) =>
-      match t1.derive_type!(ctx).lcst(ctx) {
+      match t1.derive_type(ctx).lcst(ctx) {
         Record(ltys) =>
           match ltys.lookup(l) {
-            None => error_info!("label \{l} not found", info~)
+            None => error_info("label \{l} not found", info~)
             Some(ty) => ty
           }
-        _ => error_info!("record type expected", info~)
+        _ => error_info("record type expected", info~)
       }
     Tag(info, l, t1, ty) =>
       match ty.lcst(ctx) {
         Variant(ltys) =>
           match ltys.lookup(l) {
-            None => error_info!("label \{l} not found", info~)
+            None => error_info("label \{l} not found", info~)
             Some(ann_ty) =>
-              if t1.derive_type!(ctx).subtype_of(ann_ty, ctx) {
+              if t1.derive_type(ctx).subtype_of(ann_ty, ctx) {
                 ty
               } else {
-                error_info!("variant does not have the expected type", info~)
+                error_info("variant does not have the expected type", info~)
               }
           }
-        _ => error_info!("annotation is not a variant type", info~)
+        _ => error_info("annotation is not a variant type", info~)
       }
     Case(info, t1, cases) =>
-      match t1.derive_type!(ctx).lcst(ctx) {
+      match t1.derive_type(ctx).lcst(ctx) {
         Variant(ltys) => {
           for case in cases {
             if ltys.lookup(case.0).is_empty() {
-              error_info!("label \{case.0} not in type", info~)
+              error_info("label \{case.0} not in type", info~)
             }
           }
           let case_tys = loop (cases, @immut/list.Nil) {
@@ -628,115 +628,115 @@ fn derive_type!(self : Term, ctx : Context) -> Type {
             (Cons((l, (x, t)), rest), acc) => {
               let ty = ltys.lookup(l).unwrap()
               let ctx1 = ctx.add_binding(x, Var(ty))
-              continue (rest, Cons(t.derive_type!(ctx1).shift(-1), acc))
+              continue (rest, Cons(t.derive_type(ctx1).shift(-1), acc))
             }
           }
           let ty1 = case_tys.unsafe_head()
           case_tys.fold(init=ty1, fn(ty1, ty2) { ty1.join(ty2, ctx) })
         }
-        _ => error_info!("variant type expected", info~)
+        _ => error_info("variant type expected", info~)
       }
     String(_) => String
     Double(_) => Double
     Timesdouble(info, t1, t2) =>
-      if t1.derive_type!(ctx).subtype_of(Double, ctx) &&
-        t2.derive_type!(ctx).subtype_of(Double, ctx) {
+      if t1.derive_type(ctx).subtype_of(Double, ctx) &&
+        t2.derive_type(ctx).subtype_of(Double, ctx) {
         Double
       } else {
-        error_info!("argument of timesdouble is not a decimal number", info~)
+        error_info("argument of timesdouble is not a decimal number", info~)
       }
     Fix(info, t1) =>
-      match t1.derive_type!(ctx).lcst(ctx) {
+      match t1.derive_type(ctx).lcst(ctx) {
         Arr(t11, t12) =>
           if t12.subtype_of(t11, ctx) {
             t12
           } else {
-            error_info!("result of body not compatible with domain", info~)
+            error_info("result of body not compatible with domain", info~)
           }
-        _ => error_info!("arrow type expected", info~)
+        _ => error_info("arrow type expected", info~)
       }
     TAbs(_, x, ty1, t2) => {
       let ctx1 = ctx.add_binding(x, TyVar(ty1))
-      let ty2 = t2.derive_type!(ctx1)
+      let ty2 = t2.derive_type(ctx1)
       All(x, ty1, ty2)
     }
     TApp(info, t1, ty2) => {
-      let ty1 = t1.derive_type!(ctx)
+      let ty1 = t1.derive_type(ctx)
       match ty1.lcst(ctx) {
         All(_, ty11, ty12) =>
           if not(ty2.subtype_of(ty11, ctx)) {
-            error_info!("type parameter bound mismatch", info~)
+            error_info("type parameter bound mismatch", info~)
           } else {
             ty12.subst_top(ty2)
           }
-        _ => error_info!("universal type expected", info~)
+        _ => error_info("universal type expected", info~)
       }
     }
     Pack(info, ty1, t2, ty3) => {
-      let ty2 = t2.derive_type!(ctx)
-      let kd3 = ty3.derive_kind!(ctx, info)
+      let ty2 = t2.derive_type(ctx)
+      let kd3 = ty3.derive_kind(ctx, info)
       if kd3 != Star {
-        error_info!("star kind expected", info~)
+        error_info("star kind expected", info~)
       } else {
         match ty3.lcst(ctx) {
           Some(_, ty31, ty32) =>
             if not(ty1.subtype_of(ty31, ctx)) {
-              error_info!("hidden type not a subtype of bound", info~)
+              error_info("hidden type not a subtype of bound", info~)
             } else {
               let ty2_expect = ty32.subst_top(ty1)
               if ty2.subtype_of(ty2_expect, ctx) {
                 ty3
               } else {
-                error_info!("does not match the declared type", info~)
+                error_info("does not match the declared type", info~)
               }
             }
-          _ => error_info!("existential type expected", info~)
+          _ => error_info("existential type expected", info~)
         }
       }
     }
     Unpack(info, x1, x2, t1, t2) => {
-      let ty1 = t1.derive_type!(ctx)
+      let ty1 = t1.derive_type(ctx)
       match ty1.lcst(ctx) {
         Some(_, ty11, ty12) => {
           let ctx1 = ctx.add_binding(x1, TyVar(ty11))
           let ctx2 = ctx1.add_binding(x2, Var(ty12))
-          t2.derive_type!(ctx2).shift(-2)
+          t2.derive_type(ctx2).shift(-2)
         }
-        _ => error_info!("existential type expected", info~)
+        _ => error_info("existential type expected", info~)
       }
     }
   }
 }
 
 ///|
-fn derive_kind!(self : Type, ctx : Context, info : Info) -> Kind {
+fn derive_kind(self : Type, ctx : Context, info : Info) -> Kind raise {
   match self {
     Bool => Star
     Nat => Star
     Arr(ty1, ty2) => {
-      if ty1.derive_kind!(ctx, info) != Star {
-        error_info!("star kind expected", info~)
+      if ty1.derive_kind(ctx, info) != Star {
+        error_info("star kind expected", info~)
       }
-      if ty2.derive_kind!(ctx, info) != Star {
-        error_info!("star kind expected", info~)
+      if ty2.derive_kind(ctx, info) != Star {
+        error_info("star kind expected", info~)
       }
       Star
     }
-    Var(x, _) => ctx.get_kind!(x, info)
+    Var(x, _) => ctx.get_kind(x, info)
     Id(_) => Star
     Unit => Star
     Record(ltys) => {
       for lty in ltys {
-        if lty.1.derive_kind!(ctx, info) != Star {
-          error_info!("star kind expected", info~)
+        if lty.1.derive_kind(ctx, info) != Star {
+          error_info("star kind expected", info~)
         }
       }
       Star
     }
     Variant(ltys) => {
       for lty in ltys {
-        if lty.1.derive_kind!(ctx, info) != Star {
-          error_info!("star kind expected", info~)
+        if lty.1.derive_kind(ctx, info) != Star {
+          error_info("star kind expected", info~)
         }
       }
       Star
@@ -745,35 +745,35 @@ fn derive_kind!(self : Type, ctx : Context, info : Info) -> Kind {
     Double => Star
     All(x, kd1, ty2) => {
       let ctx1 = ctx.add_binding(x, TyVar(kd1))
-      if ty2.derive_kind!(ctx1, info) != Star {
-        error_info!("star kind expected", info~)
+      if ty2.derive_kind(ctx1, info) != Star {
+        error_info("star kind expected", info~)
       }
       Star
     }
     Some(x, kd1, ty2) => {
       let ctx1 = ctx.add_binding(x, TyVar(kd1))
-      if ty2.derive_kind!(ctx1, info) != Star {
-        error_info!("star kind expected", info~)
+      if ty2.derive_kind(ctx1, info) != Star {
+        error_info("star kind expected", info~)
       }
       Star
     }
     Top => Star
     Abs(x, kd1, ty2) => {
       let ctx1 = ctx.add_binding(x, TyVar(kd1.make_top()))
-      let kd2 = ty2.derive_kind!(ctx1, info)
+      let kd2 = ty2.derive_kind(ctx1, info)
       Arr(kd1, kd2)
     }
     App(ty1, ty2) => {
-      let kd1 = ty1.derive_kind!(ctx, info)
-      let kd2 = ty2.derive_kind!(ctx, info)
+      let kd1 = ty1.derive_kind(ctx, info)
+      let kd2 = ty2.derive_kind(ctx, info)
       match kd1 {
         Arr(kd11, kd12) =>
           if kd2 == kd11 {
             kd12
           } else {
-            error_info!("parameter kind mismatch", info~)
+            error_info("parameter kind mismatch", info~)
           }
-        _ => error_info!("arrow kind expected", info~)
+        _ => error_info("arrow kind expected", info~)
       }
     }
   }
@@ -794,29 +794,33 @@ fn Binding::eval(self : Binding, ctx : Context) -> Binding {
 }
 
 ///|
-fn Binding::derive_type!(self : Binding, ctx : Context, info : Info) -> Binding {
+fn Binding::derive_type(
+  self : Binding,
+  ctx : Context,
+  info : Info
+) -> Binding raise {
   match self {
     Name => Name
     TmAbb(t, None) => {
-      let ty = t.derive_type!(ctx)
+      let ty = t.derive_type(ctx)
       TmAbb(t, Some(ty))
     }
     TmAbb(t, Some(ty)) =>
-      if t.derive_type!(ctx).subtype_of(ty, ctx) {
+      if t.derive_type(ctx).subtype_of(ty, ctx) {
         TmAbb(t, Some(ty))
       } else {
-        error_info!("type of binding does not match declared type", info~)
+        error_info("type of binding does not match declared type", info~)
       }
     Var(ty) => Var(ty)
     TyAbb(ty, None) => {
-      let kd = ty.derive_kind!(ctx, info)
+      let kd = ty.derive_kind(ctx, info)
       TyAbb(ty, Some(kd))
     }
     TyAbb(ty, Some(kd)) =>
-      if ty.derive_kind!(ctx, info) == kd {
+      if ty.derive_kind(ctx, info) == kd {
         TyAbb(ty, Some(kd))
       } else {
-        error_info!("kind of binding does not match declared kind", info~)
+        error_info("kind of binding does not match declared kind", info~)
       }
     TyVar(ty) => TyVar(ty)
   }

@@ -34,7 +34,7 @@ let string_builder : StringBuilder = StringBuilder::new()
 let string_start : Ref[Int] = Ref::new(0)
 }
 
-rule token() -> (Token, Position, Position) {
+rule token() -> (Token, Pos, Pos) {
   parse {
     ('\r'* '\n') as t => { newline($endpos(t)); token(lexbuf) }
     [' ' '\t']+ => { token(lexbuf) }
@@ -42,7 +42,7 @@ rule token() -> (Token, Position, Position) {
     "/*" => { comment_depth.val = 1; comment(lexbuf); token(lexbuf) }
     (['0'-'9']+ '.' ['0'-'9']+) as t => {
       try {
-        (DOUBLEV(@strconv.parse_double!(t)), newpos($startpos(t)), newpos($endpos(t)))
+        (DOUBLEV(@strconv.parse_double(t)), newpos($startpos(t)), newpos($endpos(t)))
       } catch {
         StrConvError(_) => {
           record_lex_error("double literal invalid", newpos($startpos(t)), newpos($endpos(t)))
@@ -52,7 +52,7 @@ rule token() -> (Token, Position, Position) {
     }
     ['0'-'9']+ as t => {
       try {
-        (INTV(@strconv.parse_int!(t)), newpos($startpos(t)), newpos($endpos(t)))
+        (INTV(@strconv.parse_int(t)), newpos($startpos(t)), newpos($endpos(t)))
       } catch {
         StrConvError(_) => {
           record_lex_error("int literal invalid", newpos($startpos(t)), newpos($endpos(t)))
@@ -118,7 +118,7 @@ rule comment() -> Unit {
   }
 }
 
-rule string() -> (Token, Position, Position) {
+rule string() -> (Token, Pos, Pos) {
   parse {
     '"' as t => { (STRINGV(string_builder.to_string()), newpos(string_start.val), newpos($endpos(t))) }
     '\\' => { string_builder.write_string("\\\\"); string(lexbuf) }
@@ -136,7 +136,7 @@ pub fn new_lexer(input : String) -> Lexer {
   Lexbuf::from_string(input)
 }
 
-pub fn next_token(self : Lexer) -> (Token, Position, Position) {
+pub fn next_token(self : Lexer) -> (Token, Pos, Pos) {
   token(self._)
 }
 }
