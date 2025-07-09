@@ -92,9 +92,9 @@ fn Context::add_name(self : Context, x : String) -> Context {
 }
 
 ///|
-fn Context::name_to_index!(self : Context, x : String, info : Info) -> Int {
+fn Context::name_to_index(self : Context, x : String, info : Info) -> Int raise {
   loop (0, self._) {
-    (_, Nil) => error_info!("identifier \"\{x}\" is unbound", info~)
+    (_, Nil) => error_info("identifier \"\{x}\" is unbound", info~)
     (i, Cons((y, _), rest)) => if y == x { i } else { continue (i + 1, rest) }
   }
 }
@@ -139,14 +139,14 @@ fn Context::get_type(self : Context, x : Int) -> Type {
 }
 
 ///|
-fn Context::get_kind!(self : Context, x : Int, info : Info) -> Kind {
+fn Context::get_kind(self : Context, x : Int, info : Info) -> Kind raise {
   match self.get_binding(x) {
     Name => panic()
     TmAbb(_) => panic()
     Var(_) => panic()
     TyAbb(_, Some(kd)) => kd
     TyAbb(_, None) => panic()
-    TyVar(ty) => ty.derive_kind!(self, info)
+    TyVar(ty) => ty.derive_kind(self, info)
   }
 }
 

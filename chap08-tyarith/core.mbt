@@ -17,10 +17,10 @@ fn is_val(self : Term) -> Bool {
 }
 
 ///|
-type! NoRuleApplies
+suberror NoRuleApplies
 
 ///|
-fn eval1(self : Term) -> Term!NoRuleApplies {
+fn eval1(self : Term) -> Term raise NoRuleApplies {
   match self {
     True(_) => raise NoRuleApplies
     False(_) => raise NoRuleApplies
@@ -32,7 +32,7 @@ fn eval1(self : Term) -> Term!NoRuleApplies {
           _ => raise NoRuleApplies
         }
       } else {
-        let t1_prime = t1.eval1!()
+        let t1_prime = t1.eval1()
         If(info, t1_prime, t2, t3)
       }
     Zero(_) => raise NoRuleApplies
@@ -40,7 +40,7 @@ fn eval1(self : Term) -> Term!NoRuleApplies {
       if t1.is_val() {
         raise NoRuleApplies
       } else {
-        let t1_prime = t1.eval1!()
+        let t1_prime = t1.eval1()
         Succ(info, t1_prime)
       }
     Pred(info, t1) =>
@@ -56,7 +56,7 @@ fn eval1(self : Term) -> Term!NoRuleApplies {
           _ => raise NoRuleApplies
         }
       } else {
-        let t1_prime = t1.eval1!()
+        let t1_prime = t1.eval1()
         Pred(info, t1_prime)
       }
     IsZero(info, t1) =>
@@ -72,7 +72,7 @@ fn eval1(self : Term) -> Term!NoRuleApplies {
           _ => raise NoRuleApplies
         }
       } else {
-        let t1_prime = t1.eval1!()
+        let t1_prime = t1.eval1()
         IsZero(info, t1_prime)
       }
   }
@@ -83,7 +83,7 @@ fn eval(self : Term) -> Term {
   loop self {
     t =>
       try {
-        continue t.eval1!()
+        continue t.eval1()
       } catch {
         NoRuleApplies => break t
       }
@@ -91,40 +91,40 @@ fn eval(self : Term) -> Term {
 }
 
 ///|
-fn derive_type!(self : Term) -> Type {
+fn derive_type(self : Term) -> Type raise {
   match self {
     True(_) => Bool
     False(_) => Bool
     If(info, t1, t2, t3) =>
-      if t1.derive_type!() == Bool {
-        let ty2 = t2.derive_type!()
-        let ty3 = t3.derive_type!()
+      if t1.derive_type() == Bool {
+        let ty2 = t2.derive_type()
+        let ty3 = t3.derive_type()
         if ty2 == ty3 {
           ty2
         } else {
-          error_info!("arms of conditional have different types", info~)
+          error_info("arms of conditional have different types", info~)
         }
       } else {
-        error_info!("guard of conditional not a boolean", info~)
+        error_info("guard of conditional not a boolean", info~)
       }
     Zero(_) => Nat
     Succ(info, t1) =>
-      if t1.derive_type!() == Nat {
+      if t1.derive_type() == Nat {
         Nat
       } else {
-        error_info!("argument of succ is not a number", info~)
+        error_info("argument of succ is not a number", info~)
       }
     Pred(info, t1) =>
-      if t1.derive_type!() == Nat {
+      if t1.derive_type() == Nat {
         Nat
       } else {
-        error_info!("argument of pred is not a number", info~)
+        error_info("argument of pred is not a number", info~)
       }
     IsZero(info, t1) =>
-      if t1.derive_type!() == Nat {
+      if t1.derive_type() == Nat {
         Bool
       } else {
-        error_info!("argument of iszero is not a number", info~)
+        error_info("argument of iszero is not a number", info~)
       }
   }
 }

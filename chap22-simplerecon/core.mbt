@@ -18,10 +18,10 @@ fn is_val(self : Term) -> Bool {
 }
 
 ///|
-type! NoRuleApplies
+suberror NoRuleApplies
 
 ///|
-fn eval1(self : Term, ctx : Context) -> Term!NoRuleApplies {
+fn eval1(self : Term, ctx : Context) -> Term raise NoRuleApplies {
   match self {
     True(_) => raise NoRuleApplies
     False(_) => raise NoRuleApplies
@@ -33,7 +33,7 @@ fn eval1(self : Term, ctx : Context) -> Term!NoRuleApplies {
           _ => raise NoRuleApplies
         }
       } else {
-        let t1_prime = t1.eval1!(ctx)
+        let t1_prime = t1.eval1(ctx)
         If(info, t1_prime, t2, t3)
       }
     Zero(_) => raise NoRuleApplies
@@ -41,7 +41,7 @@ fn eval1(self : Term, ctx : Context) -> Term!NoRuleApplies {
       if t1.is_val() {
         raise NoRuleApplies
       } else {
-        let t1_prime = t1.eval1!(ctx)
+        let t1_prime = t1.eval1(ctx)
         Succ(info, t1_prime)
       }
     Pred(info, t1) =>
@@ -57,7 +57,7 @@ fn eval1(self : Term, ctx : Context) -> Term!NoRuleApplies {
           _ => raise NoRuleApplies
         }
       } else {
-        let t1_prime = t1.eval1!(ctx)
+        let t1_prime = t1.eval1(ctx)
         Pred(info, t1_prime)
       }
     IsZero(info, t1) =>
@@ -73,7 +73,7 @@ fn eval1(self : Term, ctx : Context) -> Term!NoRuleApplies {
           _ => raise NoRuleApplies
         }
       } else {
-        let t1_prime = t1.eval1!(ctx)
+        let t1_prime = t1.eval1(ctx)
         IsZero(info, t1_prime)
       }
     Var(_, x, _) =>
@@ -90,11 +90,11 @@ fn eval1(self : Term, ctx : Context) -> Term!NoRuleApplies {
             _ => raise NoRuleApplies
           }
         } else {
-          let t2_prime = t2.eval1!(ctx)
+          let t2_prime = t2.eval1(ctx)
           App(info, t1, t2_prime)
         }
       } else {
-        let t1_prime = t1.eval1!(ctx)
+        let t1_prime = t1.eval1(ctx)
         App(info, t1_prime, t2)
       }
   }
@@ -105,7 +105,7 @@ fn eval(self : Term, ctx : Context) -> Term {
   loop self {
     t =>
       try {
-        continue t.eval1!(ctx)
+        continue t.eval1(ctx)
       } catch {
         NoRuleApplies => break t
       }
@@ -174,36 +174,36 @@ fn Constr::append(self : Constr, other : Constr) -> Unit {
 }
 
 ///|
-fn recon_type!(
+fn recon_type(
   self : Term,
   ctx : Context,
   uvar_gen : UVarGen,
   constr : Constr
-) -> Type {
+) -> Type raise {
   match self {
     True(_) => Bool
     False(_) => Bool
     If(_, t1, t2, t3) => {
-      let ty1 = t1.recon_type!(ctx, uvar_gen, constr)
-      let ty2 = t2.recon_type!(ctx, uvar_gen, constr)
-      let ty3 = t3.recon_type!(ctx, uvar_gen, constr)
+      let ty1 = t1.recon_type(ctx, uvar_gen, constr)
+      let ty2 = t2.recon_type(ctx, uvar_gen, constr)
+      let ty3 = t3.recon_type(ctx, uvar_gen, constr)
       constr.push_back((ty1, Bool))
       constr.push_back((ty2, ty3))
       ty3
     }
     Zero(_) => Nat
     Succ(_, t1) => {
-      let ty1 = t1.recon_type!(ctx, uvar_gen, constr)
+      let ty1 = t1.recon_type(ctx, uvar_gen, constr)
       constr.push_back((ty1, Nat))
       Nat
     }
     Pred(_, t1) => {
-      let ty1 = t1.recon_type!(ctx, uvar_gen, constr)
+      let ty1 = t1.recon_type(ctx, uvar_gen, constr)
       constr.push_back((ty1, Nat))
       Nat
     }
     IsZero(_, t1) => {
-      let ty1 = t1.recon_type!(ctx, uvar_gen, constr)
+      let ty1 = t1.recon_type(ctx, uvar_gen, constr)
       constr.push_back((ty1, Nat))
       Bool
     }
@@ -211,17 +211,17 @@ fn recon_type!(
     Abs(_, x, None, t2) => {
       let tyx = Id(uvar_gen.next())
       let ctx1 = ctx.add_binding(x, Var(tyx))
-      let ty2 = t2.recon_type!(ctx1, uvar_gen, constr)
+      let ty2 = t2.recon_type(ctx1, uvar_gen, constr)
       Arr(tyx, ty2)
     }
     Abs(_, x, Some(ty1), t2) => {
       let ctx1 = ctx.add_binding(x, Var(ty1))
-      let ty2 = t2.recon_type!(ctx1, uvar_gen, constr)
+      let ty2 = t2.recon_type(ctx1, uvar_gen, constr)
       Arr(ty1, ty2)
     }
     App(_, t1, t2) => {
-      let ty1 = t1.recon_type!(ctx, uvar_gen, constr)
-      let ty2 = t2.recon_type!(ctx, uvar_gen, constr)
+      let ty1 = t1.recon_type(ctx, uvar_gen, constr)
+      let ty2 = t2.recon_type(ctx, uvar_gen, constr)
       let tyx = Id(uvar_gen.next())
       constr.push_back((ty1, Arr(ty2, tyx)))
       tyx
@@ -269,7 +269,7 @@ fn Constr::subst(self : Constr, x : String, s : Type) -> Unit {
 }
 
 ///|
-fn Constr::unify!(self : Constr, msg : String, info : Info) -> Unit {
+fn Constr::unify(self : Constr, msg : String, info : Info) -> Unit raise {
   let sol = Constr::new()
   loop () {
     _ =>
@@ -284,7 +284,7 @@ fn Constr::unify!(self : Constr, msg : String, info : Info) -> Unit {
               if ty1 == Id(x) {
                 continue ()
               } else if ty1.has_free_var(x) {
-                error_info!("\{msg}: circular constraints", info~)
+                error_info("\{msg}: circular constraints", info~)
               } else {
                 self.subst(x, ty1)
                 sol.push_back((Id(x), ty1))
@@ -294,7 +294,7 @@ fn Constr::unify!(self : Constr, msg : String, info : Info) -> Unit {
               if ty2 == Id(x) {
                 continue ()
               } else if ty2.has_free_var(x) {
-                error_info!("\{msg}: circular constraints", info~)
+                error_info("\{msg}: circular constraints", info~)
               } else {
                 self.subst(x, ty2)
                 sol.push_back((Id(x), ty2))
@@ -307,7 +307,7 @@ fn Constr::unify!(self : Constr, msg : String, info : Info) -> Unit {
               self.push_front((ty12, ty22))
               continue ()
             }
-            _ => error_info!("unsolvable constraints", info~)
+            _ => error_info("unsolvable constraints", info~)
           }
       }
   }
@@ -326,24 +326,24 @@ fn Binding::eval(self : Binding, ctx : Context) -> Binding {
 }
 
 ///|
-fn Binding::recon_type!(
+fn Binding::recon_type(
   self : Binding,
   ctx : Context,
   uvar_gen : UVarGen,
   constr : Constr,
   info : Info
-) -> Binding {
+) -> Binding raise {
   match self {
     Name => Name
     TmAbb(t, None) => {
-      let ty = t.recon_type!(ctx, uvar_gen, constr)
-      constr.unify!("could not simplify constraints", info)
+      let ty = t.recon_type(ctx, uvar_gen, constr)
+      constr.unify("could not simplify constraints", info)
       TmAbb(t, Some(ty.subst_constr(constr)))
     }
     TmAbb(t, Some(ann_ty)) => {
-      let ty = t.recon_type!(ctx, uvar_gen, constr)
+      let ty = t.recon_type(ctx, uvar_gen, constr)
       constr.push_back((ty, ann_ty))
-      constr.unify!("could not simplify constraints", info)
+      constr.unify("could not simplify constraints", info)
       TmAbb(t, Some(ann_ty))
     }
     Var(ty) => Var(ty)

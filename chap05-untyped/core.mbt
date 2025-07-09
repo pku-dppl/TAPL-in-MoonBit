@@ -18,10 +18,10 @@ fn is_val(self : Term) -> Bool {
 }
 
 ///|
-type! NoRuleApplies
+suberror NoRuleApplies
 
 ///|
-fn eval1(self : Term, ctx : Context) -> Term!NoRuleApplies {
+fn eval1(self : Term, ctx : Context) -> Term raise NoRuleApplies {
   match self {
     True(_) => raise NoRuleApplies
     False(_) => raise NoRuleApplies
@@ -33,7 +33,7 @@ fn eval1(self : Term, ctx : Context) -> Term!NoRuleApplies {
           _ => raise NoRuleApplies
         }
       } else {
-        let t1_prime = t1.eval1!(ctx)
+        let t1_prime = t1.eval1(ctx)
         If(info, t1_prime, t2, t3)
       }
     Zero(_) => raise NoRuleApplies
@@ -41,7 +41,7 @@ fn eval1(self : Term, ctx : Context) -> Term!NoRuleApplies {
       if t1.is_val() {
         raise NoRuleApplies
       } else {
-        let t1_prime = t1.eval1!(ctx)
+        let t1_prime = t1.eval1(ctx)
         Succ(info, t1_prime)
       }
     Pred(info, t1) =>
@@ -57,7 +57,7 @@ fn eval1(self : Term, ctx : Context) -> Term!NoRuleApplies {
           _ => raise NoRuleApplies
         }
       } else {
-        let t1_prime = t1.eval1!(ctx)
+        let t1_prime = t1.eval1(ctx)
         Pred(info, t1_prime)
       }
     IsZero(info, t1) =>
@@ -73,7 +73,7 @@ fn eval1(self : Term, ctx : Context) -> Term!NoRuleApplies {
           _ => raise NoRuleApplies
         }
       } else {
-        let t1_prime = t1.eval1!(ctx)
+        let t1_prime = t1.eval1(ctx)
         IsZero(info, t1_prime)
       }
     Var(_, x, _) =>
@@ -90,11 +90,11 @@ fn eval1(self : Term, ctx : Context) -> Term!NoRuleApplies {
             _ => raise NoRuleApplies
           }
         } else {
-          let t2_prime = t2.eval1!(ctx)
+          let t2_prime = t2.eval1(ctx)
           App(info, t1, t2_prime)
         }
       } else {
-        let t1_prime = t1.eval1!(ctx)
+        let t1_prime = t1.eval1(ctx)
         App(info, t1_prime, t2)
       }
   }
@@ -105,7 +105,7 @@ fn eval(self : Term, ctx : Context) -> Term {
   loop self {
     t =>
       try {
-        continue t.eval1!(ctx)
+        continue t.eval1(ctx)
       } catch {
         NoRuleApplies => break t
       }
