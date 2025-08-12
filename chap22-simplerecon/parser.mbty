@@ -41,12 +41,12 @@
 %%
 
 toplevel
-  : EOF                                 { fn(ctx) { (Nil, ctx) } }
+  : EOF                                 { fn(ctx) { (@list.empty(), ctx) } }
   | command ";" toplevel                {
       fn(ctx) {
         let (cmd, ctx1) = $1(ctx)
         let (cmds, ctx2) = $3(ctx1)
-        (Cons(cmd, cmds), ctx2)
+        (cmds.add(cmd), ctx2)
       }
     }
   ;

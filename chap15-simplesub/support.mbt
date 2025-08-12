@@ -34,7 +34,7 @@ fn[T] error_info(msg : String, info~ : Info = UNKNOWN) -> T raise {
 }
 
 ///|
-typealias (Context) -> (@immut/list.T[Command], Context) raise Error as ParseToplevel
+typealias (Context) -> (@list.List[Command], Context) raise Error as ParseToplevel
 
 ///|
 typealias (Context) -> (Command, Context) raise Error as ParseCommand
@@ -46,7 +46,7 @@ typealias (Context) -> Binding raise Error as ParseBinder
 typealias (Context) -> Term raise Error as ParseTerm
 
 ///|
-typealias (Context, Int) -> @immut/list.T[(String, Term)] raise Error as ParseLabelTerms
+typealias (Context, Int) -> @list.List[(String, Term)] raise Error as ParseLabelTerms
 
 ///|
 typealias (Context, Int) -> (String, Term) raise Error as ParseLabelTerm
@@ -55,7 +55,7 @@ typealias (Context, Int) -> (String, Term) raise Error as ParseLabelTerm
 typealias (Context) -> Type as ParseType
 
 ///|
-typealias (Context, Int) -> @immut/list.T[(String, Type)] as ParseLabelTypes
+typealias (Context, Int) -> @list.List[(String, Type)] as ParseLabelTypes
 
 ///|
 typealias (Context, Int) -> (String, Type) as ParseLabelType

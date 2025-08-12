@@ -1,5 +1,6 @@
 {
   "is-main": true,
+  "warn-list": "-7",
   "import": ["moonbitlang/x/fs", "moonbitlang/x/sys"],
   "pre-build": [
     {

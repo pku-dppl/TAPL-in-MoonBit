@@ -111,14 +111,14 @@ fn eval1(self : Term, ctx : Context) -> Term raise NoRuleApplies {
         Ascribe(info, t1_prime, ty1)
       }
     Record(info, lts) =>
-      loop (lts, @immut/list.Nil) {
-        (Nil, _) => raise NoRuleApplies
-        (Cons((l, t), rest), acc) =>
+      loop (lts, @list.empty()) {
+        (Empty, _) => raise NoRuleApplies
+        (More((l, t), tail=rest), acc) =>
           if t.is_val() {
-            continue (rest, Cons((l, t), acc))
+            continue (rest, acc.add((l, t)))
           } else {
             let t_prime = t.eval1(ctx)
-            break Record(info, acc.rev_concat(Cons((l, t_prime), rest)))
+            break Record(info, acc.rev_concat(rest.add((l, t_prime))))
           }
       }
     Proj(info, t1, l) =>
@@ -257,17 +257,23 @@ fn Type::equiv_helper(
       (Id(b1), Id(b2)) => b1 == b2
       (Unit, Unit) => true
       (Record(ltys1), Record(ltys2)) =>
-        ltys1
-        .zip(ltys2)
-        .map_or(false, fn(l) {
-          l.all(fn(p) { p.0.0 == p.1.0 && p.0.1.equiv_helper(p.1.1, ctx, seen) })
-        })
+        loop (ltys1, ltys2) {
+          (Empty, Empty) => true
+          (More((l1, ty1), tail=rest1), More((l2, ty2), tail=rest2)) => {
+            guard l1 == l2 && ty1.equiv_helper(ty2, ctx, seen) else { false }
+            continue (rest1, rest2)
+          }
+          _ => false
+        }
       (Variant(ltys1), Variant(ltys2)) =>
-        ltys1
-        .zip(ltys2)
-        .map_or(false, fn(l) {
-          l.all(fn(p) { p.0.0 == p.1.0 && p.0.1.equiv_helper(p.1.1, ctx, seen) })
-        })
+        loop (ltys1, ltys2) {
+          (Empty, Empty) => true
+          (More((l1, ty1), tail=rest1), More((l2, ty2), tail=rest2)) => {
+            guard l1 == l2 && ty1.equiv_helper(ty2, ctx, seen) else { false }
+            continue (rest1, rest2)
+          }
+          _ => false
+        }
       (String, String) => true
       (Double, Double) => true
       _ => false
@@ -343,11 +349,11 @@ fn derive_type(self : Term, ctx : Context) -> Type raise {
         error_info("body of as-term does not have the expected type", info~)
       }
     Record(info, lts) =>
-      loop (lts, @immut/list.Nil) {
-        (Nil, acc) => break Record(acc.rev())
-        (Cons((l, t), rest), acc) =>
+      loop (lts, @list.empty()) {
+        (Empty, acc) => break Record(acc.rev())
+        (More((l, t), tail=rest), acc) =>
           if acc.lookup(l).is_empty() {
-            continue (rest, Cons((l, t.derive_type(ctx)), acc))
+            continue (rest, acc.add((l, t.derive_type(ctx))))
           } else {
             error_info("duplicate label \{l} is not allowed", info~)
           }
@@ -383,16 +389,16 @@ fn derive_type(self : Term, ctx : Context) -> Type raise {
               error_info("label \{case.0} not in type", info~)
             }
           }
-          let case_tys = loop (cases, @immut/list.Nil) {
-            (Nil, acc) => break acc.rev()
-            (Cons((l, (x, t)), rest), acc) => {
+          let case_tys = loop (cases, @list.empty()) {
+            (Empty, acc) => break acc.rev()
+            (More((l, (x, t)), tail=rest), acc) => {
               let ty = ltys.lookup(l).unwrap()
               let ctx1 = ctx.add_binding(x, Var(ty))
-              continue (rest, Cons(t.derive_type(ctx1).shift(-1), acc))
+              continue (rest, acc.add(t.derive_type(ctx1).shift(-1)))
             }
           }
-          let ty1 = case_tys.unsafe_head()
-          for ty in case_tys.tail() {
+          guard case_tys is More(ty1, tail=case_tys)
+          for ty in case_tys {
             if not(ty.equiv(ty1, ctx)) {
               error_info("cases do not have the same type", info~)
             }

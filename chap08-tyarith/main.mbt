@@ -21,8 +21,8 @@ fn process_file(fname : String) -> Unit raise {
     already_imported.push(fname)
     let cmds = parse_file(fname)
     loop cmds {
-      Nil => break
-      Cons(c, rest) => {
+      Empty => break
+      More(c, tail=rest) => {
         process_command(c)
         continue rest
       }
@@ -31,7 +31,7 @@ fn process_file(fname : String) -> Unit raise {
 }
 
 ///|
-fn parse_file(fname : String) -> @immut/list.T[Command] raise {
+fn parse_file(fname : String) -> @list.List[Command] raise {
   try {
     let code = @fs.read_file_to_string(fname)
     let lexer = new_lexer(code)

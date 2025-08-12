@@ -6,8 +6,8 @@ enum Type {
   Var(Int, Int)
   Id(String)
   Unit
-  Record(@immut/list.T[(String, Type)])
-  Variant(@immut/list.T[(String, Type)])
+  Record(@list.List[(String, Type)])
+  Variant(@list.List[(String, Type)])
   String
   Double
   All(String, Type)
@@ -28,10 +28,10 @@ enum Term {
   App(Info, Term, Term)
   Unit(Info)
   Ascribe(Info, Term, Type)
-  Record(Info, @immut/list.T[(String, Term)])
+  Record(Info, @list.List[(String, Term)])
   Proj(Info, Term, String)
   Tag(Info, String, Term, Type)
-  Case(Info, Term, @immut/list.T[(String, (String, Term))])
+  Case(Info, Term, @list.List[(String, (String, Term))])
   String(Info, String)
   Double(Info, Double)
   Timesdouble(Info, Term, Term)
@@ -60,21 +60,21 @@ enum Command {
 }
 
 ///|
-struct Context(@immut/list.T[(String, Binding)])
+struct Context(@list.List[(String, Binding)])
 
 ///|
 fn Context::empty() -> Context {
-  Nil
+  Context(@list.empty())
 }
 
 ///|
 fn Context::length(self : Context) -> Int {
-  self.inner().length()
+  self.0.length()
 }
 
 ///|
 fn Context::add_binding(self : Context, x : String, bind : Binding) -> Context {
-  Cons((x, bind), self.inner())
+  Context(self.0.add((x, bind)))
 }
 
 ///|
@@ -84,20 +84,25 @@ fn Context::add_name(self : Context, x : String) -> Context {
 
 ///|
 fn Context::name_to_index(self : Context, x : String, info : Info) -> Int raise {
-  loop (0, self.inner()) {
-    (_, Nil) => error_info("identifier \"\{x}\" is unbound", info~)
-    (i, Cons((y, _), rest)) => if y == x { i } else { continue (i + 1, rest) }
+  loop (0, self.0) {
+    (_, Empty) => error_info("identifier \"\{x}\" is unbound", info~)
+    (i, More((y, _), tail=rest)) =>
+      if y == x {
+        i
+      } else {
+        continue (i + 1, rest)
+      }
   }
 }
 
 ///|
 fn Context::index_to_name(self : Context, x : Int) -> String {
-  self.inner().unsafe_nth(x).0
+  self.0.unsafe_nth(x).0
 }
 
 ///|
 fn Context::is_name_bound(self : Context, x : String) -> Bool {
-  self.inner().any(fn(b) { x == b.0 })
+  self.0.any(fn(b) { x == b.0 })
 }
 
 ///|
@@ -114,7 +119,7 @@ fn Context::pick_fresh_name(self : Context, x : String) -> (Context, String) {
 
 ///|
 fn Context::get_binding(self : Context, x : Int) -> Binding {
-  self.inner().unsafe_nth(x).1.shift(x + 1)
+  self.0.unsafe_nth(x).1.shift(x + 1)
 }
 
 ///|
@@ -233,8 +238,8 @@ fn Type::output_atom(
     Record(ltys) => {
       logger.write_string("{")
       loop (ltys, 1) {
-        (Nil, _) => break
-        (Cons((l, ty), rest), i) => {
+        (Empty, _) => break
+        (More((l, ty), tail=rest), i) => {
           if i > 1 {
             logger.write_string(",")
             if outer {
@@ -253,8 +258,8 @@ fn Type::output_atom(
     Variant(ltys) => {
       logger.write_string("<")
       loop (ltys, 1) {
-        (Nil, _) => break
-        (Cons((l, ty), rest), i) => {
+        (Empty, _) => break
+        (More((l, ty), tail=rest), i) => {
           if i > 1 {
             logger.write_string(",")
             if outer {
@@ -426,8 +431,8 @@ fn Term::output(self : Term, ctx : Context, logger : &Logger) -> Unit {
       t1.output(ctx, logger)
       logger.write_string(" of ")
       loop (cases, 1) {
-        (Nil, _) => break
-        (Cons((l, (x, t)), rest), i) => {
+        (Empty, _) => break
+        (More((l, (x, t)), tail=rest), i) => {
           if i > 1 {
             logger.write_string(" | ")
           }
@@ -538,8 +543,8 @@ fn Term::output_atom(self : Term, ctx : Context, logger : &Logger) -> Unit {
     Record(_, lts) => {
       logger.write_string("{")
       loop (lts, 1) {
-        (Nil, _) => break
-        (Cons((l, t), rest), i) => {
+        (Empty, _) => break
+        (More((l, t), tail=rest), i) => {
           if i > 1 {
             logger.write_string(", ")
           }

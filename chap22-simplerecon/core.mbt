@@ -135,7 +135,7 @@ struct Constr(@deque.T[(Type, Type)])
 ///|
 impl Show for Constr with output(self, logger) {
   logger.write_string("{")
-  for i, p in self.inner() {
+  for i, p in self.0 {
     if i > 0 {
       logger.write_string(", ")
     }
@@ -153,17 +153,17 @@ fn Constr::new() -> Constr {
 
 ///|
 fn Constr::push_back(self : Constr, p : (Type, Type)) -> Unit {
-  self.inner().push_back(p)
+  self.0.push_back(p)
 }
 
 ///|
 fn Constr::push_front(self : Constr, p : (Type, Type)) -> Unit {
-  self.inner().push_front(p)
+  self.0.push_front(p)
 }
 
 ///|
 fn Constr::pop_front(self : Constr) -> (Type, Type)? {
-  self.inner().pop_front()
+  self.0.pop_front()
 }
 
 ///|
@@ -263,8 +263,8 @@ fn Type::subst_constr(self : Type, constr : Constr) -> Type {
 
 ///|
 fn Constr::subst(self : Constr, x : String, s : Type) -> Unit {
-  for i, p in self.inner() {
-    self.inner()[i] = (p.0.subst(x, s), p.1.subst(x, s))
+  for i, p in self.0 {
+    self.0[i] = (p.0.subst(x, s), p.1.subst(x, s))
   }
 }
 

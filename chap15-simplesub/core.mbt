@@ -99,14 +99,14 @@ fn eval1(self : Term, ctx : Context) -> Term raise NoRuleApplies {
         App(info, t1_prime, t2)
       }
     Record(info, lts) =>
-      loop (lts, @immut/list.Nil) {
-        (Nil, _) => raise NoRuleApplies
-        (Cons((l, t), rest), acc) =>
+      loop (lts, @list.empty()) {
+        (Empty, _) => raise NoRuleApplies
+        (More((l, t), tail=rest), acc) =>
           if t.is_val() {
-            continue (rest, Cons((l, t), acc))
+            continue (rest, acc.add((l, t)))
           } else {
             let t_prime = t.eval1(ctx)
-            break Record(info, acc.rev_concat(Cons((l, t_prime), rest)))
+            break Record(info, acc.rev_concat(rest.add((l, t_prime))))
           }
       }
     Proj(info, t1, l) =>
@@ -203,19 +203,19 @@ fn Type::meet(self : Type, other : Type) -> Type raise NoRuleApplies {
         let all_labels = labels1.concat(
           labels2.filter(fn(l) { not(labels1.contains(l)) }),
         )
-        let all_ltys = loop (all_labels, @immut/list.Nil) {
-          (Nil, acc) => break acc.rev()
-          (Cons(l, rest), acc) => {
+        let all_ltys = loop (all_labels, @list.empty()) {
+          (Empty, acc) => break acc.rev()
+          (More(l, tail=rest), acc) => {
             let ty = match (ltys1.lookup(l), ltys2.lookup(l)) {
               (Some(ty1), Some(ty2)) => ty1.meet(ty2)
               (Some(ty1), None) => ty1
               (None, Some(ty2)) => ty2
               (None, None) => panic()
             }
-            continue (rest, Cons((l, ty), acc))
+            continue (rest, acc.add((l, ty)))
           }
         }
-        Record(all_ltys)
+        Record(@list.from_array(all_ltys.to_array()))
       }
       _ => raise NoRuleApplies
     }
@@ -274,11 +274,11 @@ fn derive_type(self : Term, ctx : Context) -> Type raise {
       }
     }
     Record(info, lts) =>
-      loop (lts, @immut/list.Nil) {
-        (Nil, acc) => break Record(acc.rev())
-        (Cons((l, t), rest), acc) =>
+      loop (lts, @list.empty()) {
+        (Empty, acc) => break Record(@list.from_array(acc.rev().to_array()))
+        (More((l, t), tail=rest), acc) =>
           if acc.lookup(l).is_empty() {
-            continue (rest, Cons((l, t.derive_type(ctx)), acc))
+            continue (rest, acc.add((l, t.derive_type(ctx))))
           } else {
             error_info("duplicate label \{l} is not allowed", info~)
           }

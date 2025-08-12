@@ -42,21 +42,21 @@ enum Command {
 }
 
 ///|
-struct Context(@immut/list.T[(String, Binding)])
+struct Context(@list.List[(String, Binding)])
 
 ///|
 fn Context::empty() -> Context {
-  Nil
+  @list.empty()
 }
 
 ///|
 fn Context::length(self : Context) -> Int {
-  self.inner().length()
+  self.0.length()
 }
 
 ///|
 fn Context::add_binding(self : Context, x : String, bind : Binding) -> Context {
-  Cons((x, bind), self.inner())
+  self.0.add((x, bind))
 }
 
 ///|
@@ -66,20 +66,25 @@ fn Context::add_name(self : Context, x : String) -> Context {
 
 ///|
 fn Context::name_to_index(self : Context, x : String, info : Info) -> Int raise {
-  loop (0, self.inner()) {
-    (_, Nil) => error_info("identifier \"\{x}\" is unbound", info~)
-    (i, Cons((y, _), rest)) => if y == x { i } else { continue (i + 1, rest) }
+  loop (0, self.0) {
+    (_, Empty) => error_info("identifier \"\{x}\" is unbound", info~)
+    (i, More((y, _), tail=rest)) =>
+      if y == x {
+        i
+      } else {
+        continue (i + 1, rest)
+      }
   }
 }
 
 ///|
 fn Context::index_to_name(self : Context, x : Int) -> String {
-  self.inner().unsafe_nth(x).0
+  self.0.unsafe_nth(x).0
 }
 
 ///|
 fn Context::is_name_bound(self : Context, x : String) -> Bool {
-  self.inner().any(fn(b) { x == b.0 })
+  self.0.any(fn(b) { x == b.0 })
 }
 
 ///|
@@ -96,7 +101,7 @@ fn Context::pick_fresh_name(self : Context, x : String) -> (Context, String) {
 
 ///|
 fn Context::get_binding(self : Context, x : Int) -> Binding {
-  self.inner().unsafe_nth(x).1.shift(x + 1)
+  self.0.unsafe_nth(x).1.shift(x + 1)
 }
 
 ///|

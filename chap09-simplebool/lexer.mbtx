@@ -1,5 +1,5 @@
 {
-pub(all) type Lexer Lexbuf
+pub(all) struct Lexer(Lexbuf)
 
 let pos_fname : Ref[String] = Ref::new("<none>")
 let pos_lnum : Ref[Int] = Ref::new(1)
@@ -109,6 +109,6 @@ pub fn new_lexer(input : String) -> Lexer {
 }
 
 pub fn next_token(self : Lexer) -> (Token, Pos, Pos) {
-  token(self._)
+  token(self.0)
 }
 }

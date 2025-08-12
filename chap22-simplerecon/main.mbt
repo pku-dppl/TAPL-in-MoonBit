@@ -41,15 +41,15 @@ fn process_file(
     already_imported.push(fname)
     let cmds = parse_file(ctx, fname)
     loop (ctx, cmds) {
-      (ctx, Nil) => break ctx
-      (ctx, Cons(c, rest)) =>
+      (ctx, Empty) => break ctx
+      (ctx, More(c, tail=rest)) =>
         continue (process_command(ctx, uvar_gen, constr, c), rest)
     }
   }
 }
 
 ///|
-fn parse_file(ctx : Context, fname : String) -> @immut/list.T[Command] raise {
+fn parse_file(ctx : Context, fname : String) -> @list.List[Command] raise {
   try {
     let code = @fs.read_file_to_string(fname)
     let lexer = new_lexer(code)

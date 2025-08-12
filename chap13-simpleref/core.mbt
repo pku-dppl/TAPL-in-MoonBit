@@ -29,24 +29,24 @@ fn Store::new() -> Store {
 
 ///|
 fn Store::extend(self : Store, t : Term) -> Int {
-  let l = self.inner().length()
-  self.inner().push(t)
+  let l = self.0.length()
+  self.0.push(t)
   l
 }
 
 ///|
 fn Store::lookup(self : Store, l : Int) -> Term {
-  self.inner()[l]
+  self.0[l]
 }
 
 ///|
 fn Store::update(self : Store, l : Int, t : Term) -> Unit {
-  self.inner()[l] = t
+  self.0[l] = t
 }
 
 ///|
 fn Store::shift(self : Store, d : Int) -> Unit {
-  self.inner().map_inplace(fn(t) { t.shift(d) })
+  self.0.map_inplace(fn(t) { t.shift(d) })
 }
 
 ///|

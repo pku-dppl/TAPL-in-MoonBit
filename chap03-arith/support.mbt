@@ -34,7 +34,7 @@ fn[T] error_info(msg : String, info~ : Info = UNKNOWN) -> T raise {
 }
 
 ///|
-typealias @immut/list.T[Command] as ParseToplevel
+typealias @list.List[Command] as ParseToplevel
 
 ///|
 typealias Command as ParseCommand

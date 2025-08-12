@@ -51,12 +51,12 @@
 %%
 
 toplevel
-  : EOF                                 { fn(ctx) { (Nil, ctx) } }
+  : EOF                                 { fn(ctx) { (@list.empty(), ctx) } }
   | command ";" toplevel                {
       fn(ctx) {
         let (cmd, ctx1) = $1(ctx)
         let (cmds, ctx2) = $3(ctx1)
-        (Cons(cmd, cmds), ctx2)
+        (cmds.add(cmd), ctx2)
       }
     }
   ;
@@ -121,13 +121,13 @@ atom_term
   ;
 
 label_terms
-  :                                     { fn(_, _) { Nil } }
+  :                                     { fn(_, _) { @list.empty() } }
   | nonempty_label_terms                { $1 }
   ;
 
 nonempty_label_terms
-  : label_term                          { fn(ctx, i) { Cons($1(ctx, i), Nil) } }
-  | label_term "," nonempty_label_terms { fn(ctx, i) { Cons($1(ctx, i), $3(ctx, i + 1)) } }
+  : label_term                          { fn(ctx, i) { (@list.empty()).add($1(ctx, i)) } }
+  | label_term "," nonempty_label_terms { fn(ctx, i) { ($3(ctx, i + 1)).add($1(ctx, i)) } }
   ;
 
 label_term
@@ -149,13 +149,13 @@ atom_type
   ;
 
 label_types
-  :                                     { fn(_, _) { Nil } }
+  :                                     { fn(_, _) { @list.empty() } }
   | nonempty_label_types                { $1 }
   ;
 
 nonempty_label_types
-  : label_type                          { fn(ctx, i) { Cons($1(ctx, i), Nil) } }
-  | label_type "," nonempty_label_types { fn(ctx, i) { Cons($1(ctx, i), $3(ctx, i + 1)) } }
+  : label_type                          { fn(ctx, i) { (@list.empty()).add($1(ctx, i)) } }
+  | label_type "," nonempty_label_types { fn(ctx, i) { ($3(ctx, i + 1)).add($1(ctx, i)) } }
   ;
 
 label_type

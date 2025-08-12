@@ -2,13 +2,13 @@
 package "TAPL/chap13-simpleref"
 
 import(
-  "moonbitlang/core/immut/list"
+  "moonbitlang/core/list"
 )
 
 // Values
 fn new_lexer(String) -> Lexer
 
-fn toplevel(Array[(Token, Pos, Pos)], initial_pos? : Pos) -> ((Context) -> (@list.T[Command], Context) raise) raise ParseError
+fn toplevel(Array[(Token, Pos, Pos)], initial_pos? : Pos) -> ((Context) -> (@list.List[Command], Context) raise) raise ParseError
 
 // Errors
 type ErrorWithInfo
