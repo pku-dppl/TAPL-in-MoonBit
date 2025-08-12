@@ -6,7 +6,7 @@ fn process_command(
   ctx : Context,
   uvar_gen : UVarGen,
   constr : Constr,
-  cmd : Command
+  cmd : Command,
 ) -> Context raise {
   match cmd {
     Import(fname) => process_file(ctx, uvar_gen, constr, fname)
@@ -33,7 +33,7 @@ fn process_file(
   ctx : Context,
   uvar_gen : UVarGen,
   constr : Constr,
-  fname : String
+  fname : String,
 ) -> Context raise {
   if already_imported.contains(fname) {
     ctx

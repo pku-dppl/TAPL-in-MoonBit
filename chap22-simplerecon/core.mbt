@@ -130,12 +130,12 @@ fn UVarGen::next(self : UVarGen) -> String {
 }
 
 ///|
-type Constr @deque.T[(Type, Type)]
+struct Constr(@deque.T[(Type, Type)])
 
 ///|
 impl Show for Constr with output(self, logger) {
   logger.write_string("{")
-  for i, p in self._ {
+  for i, p in self.inner() {
     if i > 0 {
       logger.write_string(", ")
     }
@@ -153,22 +153,22 @@ fn Constr::new() -> Constr {
 
 ///|
 fn Constr::push_back(self : Constr, p : (Type, Type)) -> Unit {
-  self._.push_back(p)
+  self.inner().push_back(p)
 }
 
 ///|
 fn Constr::push_front(self : Constr, p : (Type, Type)) -> Unit {
-  self._.push_front(p)
+  self.inner().push_front(p)
 }
 
 ///|
 fn Constr::pop_front(self : Constr) -> (Type, Type)? {
-  self._.pop_front()
+  self.inner().pop_front()
 }
 
 ///|
 fn Constr::append(self : Constr, other : Constr) -> Unit {
-  for p in other._ {
+  for p in other.inner() {
     self.push_back(p)
   }
 }
@@ -178,7 +178,7 @@ fn recon_type(
   self : Term,
   ctx : Context,
   uvar_gen : UVarGen,
-  constr : Constr
+  constr : Constr,
 ) -> Type raise {
   match self {
     True(_) => Bool
@@ -252,7 +252,7 @@ fn Type::subst(self : Type, x : String, s : Type) -> Type {
 ///|
 fn Type::subst_constr(self : Type, constr : Constr) -> Type {
   let mut ty = self
-  for p in constr._ {
+  for p in constr.inner() {
     match p {
       (Id(x), ty2) => ty = ty.subst(x, ty2)
       _ => panic()
@@ -263,8 +263,8 @@ fn Type::subst_constr(self : Type, constr : Constr) -> Type {
 
 ///|
 fn Constr::subst(self : Constr, x : String, s : Type) -> Unit {
-  for i, p in self._ {
-    self._[i] = (p.0.subst(x, s), p.1.subst(x, s))
+  for i, p in self.inner() {
+    self.inner()[i] = (p.0.subst(x, s), p.1.subst(x, s))
   }
 }
 
@@ -331,7 +331,7 @@ fn Binding::recon_type(
   ctx : Context,
   uvar_gen : UVarGen,
   constr : Constr,
-  info : Info
+  info : Info,
 ) -> Binding raise {
   match self {
     Name => Name

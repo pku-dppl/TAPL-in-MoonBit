@@ -1,15 +1,25 @@
-package TAPL/chap31-fullfomsub
+// Generated using `moon info`, DON'T EDIT IT
+package "TAPL/chap31-fullfomsub"
 
-alias @moonbitlang/core/immut/list as @list
+import(
+  "moonbitlang/core/immut/list"
+)
 
 // Values
 fn new_lexer(String) -> Lexer
 
-fn next_token(Lexer) -> (Token, Pos, Pos)
+fn toplevel(Array[(Token, Pos, Pos)], initial_pos? : Pos) -> ((Context) -> (@list.T[Command], Context) raise) raise ParseError
 
-fn run(LexEngine, Lexbuf) -> (Int, Array[(Int, Int)])
+// Errors
+type ErrorWithInfo
 
-fn toplevel(Array[(Token, Pos, Pos)], initial_pos? : Pos) -> ((Context) -> (@list.T[Command], Context)!)!ParseError
+type NoRuleApplies
+
+pub suberror ParseError {
+  UnexpectedToken(Token, (Pos, Pos), Array[TokenKind])
+  UnexpectedEndOfInput(Pos, Array[TokenKind])
+}
+impl Show for ParseError
 
 // Types and methods
 type Binding
@@ -17,8 +27,6 @@ type Binding
 type Command
 
 type Context
-
-type ErrorWithInfo
 
 type Info
 
@@ -31,27 +39,14 @@ pub(all) struct LexEngine {
   start_tags : Array[Int]
   code_blocks_n : Int
 }
-impl LexEngine {
-  run(Self, Lexbuf) -> (Int, Array[(Int, Int)])
-}
+fn LexEngine::run(Self, Lexbuf) -> (Int, Array[(Int, Int)])
 
 type Lexbuf
-impl Lexbuf {
-  from_string(String) -> Self
-}
+fn Lexbuf::from_string(String) -> Self
 
-pub(all) type Lexer Lexbuf
-impl Lexer {
-  next_token(Self) -> (Token, Pos, Pos)
-}
-
-type NoRuleApplies
-
-pub type! ParseError {
-  UnexpectedToken(Token, (Pos, Pos), Array[TokenKind])
-  UnexpectedEndOfInput(Pos, Array[TokenKind])
-}
-impl Show for ParseError
+pub(all) struct Lexer(Lexbuf)
+fn Lexer::inner(Self) -> Lexbuf
+fn Lexer::next_token(Self) -> (Token, Pos, Pos)
 
 type Pos
 
@@ -112,9 +107,7 @@ pub(all) enum Token {
   USCORE
   VBAR
 }
-impl Token {
-  kind(Self) -> TokenKind
-}
+fn Token::kind(Self) -> TokenKind
 impl Show for Token
 
 pub(all) enum TokenKind {
@@ -177,7 +170,6 @@ impl Show for TokenKind
 type Type
 
 // Type aliases
-pub typealias Position = Pos
 
 // Traits
 

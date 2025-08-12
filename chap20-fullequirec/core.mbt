@@ -237,7 +237,7 @@ fn Type::equiv_helper(
   self : Type,
   other : Type,
   ctx : Context,
-  seen : @hashset.T[(Type, Type)]
+  seen : @hashset.T[(Type, Type)],
 ) -> Bool {
   if seen.contains((self, other)) {
     true
@@ -441,7 +441,7 @@ fn Binding::eval(self : Binding, ctx : Context) -> Binding {
 fn Binding::derive_type(
   self : Binding,
   ctx : Context,
-  info : Info
+  info : Info,
 ) -> Binding raise {
   match self {
     Name => Name

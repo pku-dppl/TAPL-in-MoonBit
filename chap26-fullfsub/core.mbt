@@ -425,7 +425,7 @@ fn Type::join(self : Type, other : Type, ctx : Context) -> Type {
 fn Type::meet(
   self : Type,
   other : Type,
-  ctx : Context
+  ctx : Context,
 ) -> Type raise NoRuleApplies {
   if self.subtype_of(other, ctx) {
     self
@@ -681,7 +681,7 @@ fn Binding::eval(self : Binding, ctx : Context) -> Binding {
 fn Binding::derive_type(
   self : Binding,
   ctx : Context,
-  info : Info
+  info : Info,
 ) -> Binding raise {
   match self {
     Name => Name

@@ -5,7 +5,7 @@ let already_imported : Array[String] = []
 fn process_command(
   ctx : Context,
   store : Store,
-  cmd : Command
+  cmd : Command,
 ) -> Context raise {
   match cmd {
     Import(fname) => process_file(ctx, store, fname)

@@ -463,7 +463,7 @@ fn Binding::eval(self : Binding, ctx : Context) -> Binding {
 fn Binding::derive_type(
   self : Binding,
   ctx : Context,
-  info : Info
+  info : Info,
 ) -> Binding raise {
   match self {
     Name => Name

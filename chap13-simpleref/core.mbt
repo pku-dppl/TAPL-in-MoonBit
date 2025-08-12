@@ -20,7 +20,7 @@ fn is_val(self : Term) -> Bool {
 }
 
 ///|
-type Store Array[Term]
+struct Store(Array[Term])
 
 ///|
 fn Store::new() -> Store {
@@ -29,24 +29,24 @@ fn Store::new() -> Store {
 
 ///|
 fn Store::extend(self : Store, t : Term) -> Int {
-  let l = self._.length()
-  self._.push(t)
+  let l = self.inner().length()
+  self.inner().push(t)
   l
 }
 
 ///|
 fn Store::lookup(self : Store, l : Int) -> Term {
-  self._[l]
+  self.inner()[l]
 }
 
 ///|
 fn Store::update(self : Store, l : Int, t : Term) -> Unit {
-  self._[l] = t
+  self.inner()[l] = t
 }
 
 ///|
 fn Store::shift(self : Store, d : Int) -> Unit {
-  self._.map_inplace(fn(t) { t.shift(d) })
+  self.inner().map_inplace(fn(t) { t.shift(d) })
 }
 
 ///|
@@ -298,7 +298,7 @@ fn Binding::eval(self : Binding, ctx : Context, store : Store) -> Binding {
 fn Binding::derive_type(
   self : Binding,
   ctx : Context,
-  info : Info
+  info : Info,
 ) -> Binding raise {
   match self {
     Name => Name
