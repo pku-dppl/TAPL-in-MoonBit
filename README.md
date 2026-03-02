@@ -2,7 +2,7 @@
 
 [MoonBit](https://www.moonbitlang.com/) Port of implementations for Pierce's [Types and Programming Languages](https://www.cis.upenn.edu/~bcpierce/tapl/).
 
-The port here slightly diverges from the [original implementations](https://www.cis.upenn.edu/~bcpierce/tapl/resources.html#checkers) to better suit the needs of the [Design Principles of Programming Languages](https://pku-dppl.github.io/2025/english.html) course at Peking University.
+The port here slightly diverges from the [original implementations](https://www.cis.upenn.edu/~bcpierce/tapl/resources.html#checkers) to better suit the needs of the [Design Principles of Programming Languages](https://pku-dppl.github.io/2026/english.html) course at Peking University.
 - [chap03-arith](chap03-arith) for Chapter 3: Untyped Arithmetic Expressions. An untyped calculus with Booleans and natural numbers.
 - [chap05-untyped](chap05-untyped) for Chapter 5: The Untyped Lambda-Calculus. An untyped lambda calculus with Booleans and natural numbers.
 - [chap08-tyarith](chap08-tyarith) for Chapter 8: Typed Arithmetic Expressions. A typed calculus with Booleans and natural numbers.
