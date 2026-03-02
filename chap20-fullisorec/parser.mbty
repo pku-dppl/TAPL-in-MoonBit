@@ -76,59 +76,59 @@
 %%
 
 toplevel
-  : EOF                                           { fn(ctx) { (Nil, ctx) } }
+  : EOF                                           { fn (ctx) { (@list.new(), ctx) } }
   | command ";" toplevel                          {
-      fn(ctx) {
+      fn (ctx) raise {
         let (cmd, ctx1) = $1(ctx)
         let (cmds, ctx2) = $3(ctx1)
-        (Cons(cmd, cmds), ctx2)
+        (@list.cons(cmd, cmds), ctx2)
       }
     }
   ;
 
 command
-  : "import" STRINGV                              { fn(ctx) { (Import($2), ctx) } }
-  | term                                          { fn(ctx) { (Eval(FI($startpos, $endpos), $1(ctx)), ctx) } }
-  | LCID binder                                   { fn(ctx) { (Bind(FI($startpos, $endpos), $1, $2(ctx)), ctx.add_name($1)) } }
-  | UCID ty_binder                                { fn(ctx) { (Bind(FI($startpos, $endpos), $1, $2(ctx)), ctx.add_name($1)) } }
+  : "import" STRINGV                              { fn (ctx) { (Import($2), ctx) } }
+  | term                                          { fn (ctx) raise { (Eval(FI($startpos, $endpos), $1(ctx)), ctx) } }
+  | LCID binder                                   { fn (ctx) raise { (Bind(FI($startpos, $endpos), $1, $2(ctx)), ctx.add_name($1)) } }
+  | UCID ty_binder                                { fn (ctx) raise { (Bind(FI($startpos, $endpos), $1, $2(ctx)), ctx.add_name($1)) } }
   ;
 
 binder
-  : "=" term                                      { fn(ctx) { TmAbb($2(ctx), None) } }
-  | ":" type                                      { fn(ctx) { Var($2(ctx)) } }
+  : "=" term                                      { fn (ctx) raise { TmAbb($2(ctx), None) } }
+  | ":" type                                      { fn (ctx) raise { Var($2(ctx)) } }
   ;
 
 ty_binder
-  : "=" type                                      { fn(ctx) { TyAbb($2(ctx)) } }
-  |                                               { fn(_) { TyVar } }
+  : "=" type                                      { fn (ctx) raise { TyAbb($2(ctx)) } }
+  |                                               { fn (_) { TyVar } }
   ;
 
 term
   : app_term                                      { $1 }
-  | "if" term "then" term "else" term             { fn(ctx) { If(FI($startpos, $endpos), $2(ctx), $4(ctx), $6(ctx)) } }
+  | "if" term "then" term "else" term             { fn (ctx) raise { If(FI($startpos, $endpos), $2(ctx), $4(ctx), $6(ctx)) } }
   | "lambda" LCID ":" type "." term               {
-      fn(ctx) {
+      fn (ctx) raise {
         let ctx1 = ctx.add_name($2)
         Abs(FI($startpos, $endpos), $2, $4(ctx), $6(ctx1))
       }
     }
   | "lambda" "_" ":" type "." term                {
-      fn(ctx) {
+      fn (ctx) raise {
         let ctx1 = ctx.add_name("_")
         Abs(FI($startpos, $endpos), "_", $4(ctx), $6(ctx1))
       }
     }
-  | "case" term "of" cases                        { fn(ctx) { Case(FI($startpos, $endpos), $2(ctx), $4(ctx)) } }
+  | "case" term "of" cases                        { fn (ctx) raise { Case(FI($startpos, $endpos), $2(ctx), $4(ctx)) } }
   ;
 
 cases
-  : case                                          { fn(ctx) { Cons($1(ctx), Nil) } }
-  | case "|" cases                                { fn(ctx) { Cons($1(ctx), $3(ctx)) } }
+  : case                                          { fn (ctx) raise { @list.cons($1(ctx), @list.new()) } }
+  | case "|" cases                                { fn (ctx) raise { @list.cons($1(ctx), $3(ctx)) } }
   ;
 
 case
   : "<" LCID "=" LCID ">" "==>" app_term          {
-      fn(ctx) {
+      fn (ctx) raise {
         let ctx1 = ctx.add_name($4)
         ($2, ($4, $7(ctx1)))
       }
@@ -137,29 +137,29 @@ case
 
 app_term
   : path_term                                     { $1 }
-  | "succ" path_term                              { fn(ctx) { Succ(FI($startpos, $endpos), $2(ctx)) } }
-  | "pred" path_term                              { fn(ctx) { Pred(FI($startpos, $endpos), $2(ctx)) } }
-  | "iszero" path_term                            { fn(ctx) { IsZero(FI($startpos, $endpos), $2(ctx)) } }
-  | app_term path_term                            { fn(ctx) { App(FI($startpos, $endpos), $1(ctx), $2(ctx)) } }
-  | "timesdouble" path_term path_term             { fn(ctx) { Timesdouble(FI($startpos, $endpos), $2(ctx), $3(ctx)) } }
-  | "fix" path_term                               { fn(ctx) { Fix(FI($startpos, $endpos), $2(ctx)) } }
+  | "succ" path_term                              { fn (ctx) raise { Succ(FI($startpos, $endpos), $2(ctx)) } }
+  | "pred" path_term                              { fn (ctx) raise { Pred(FI($startpos, $endpos), $2(ctx)) } }
+  | "iszero" path_term                            { fn (ctx) raise { IsZero(FI($startpos, $endpos), $2(ctx)) } }
+  | app_term path_term                            { fn (ctx) raise { App(FI($startpos, $endpos), $1(ctx), $2(ctx)) } }
+  | "timesdouble" path_term path_term             { fn (ctx) raise { Timesdouble(FI($startpos, $endpos), $2(ctx), $3(ctx)) } }
+  | "fix" path_term                               { fn (ctx) raise { Fix(FI($startpos, $endpos), $2(ctx)) } }
   ;
 
 path_term
   : ascribe_term                                  { $1 }
-  | path_term "." LCID                            { fn(ctx) { Proj(FI($startpos, $endpos), $1(ctx), $3) } }
-  | path_term "." INTV                            { fn(ctx) { Proj(FI($startpos, $endpos), $1(ctx), $3.to_string()) } }
+  | path_term "." LCID                            { fn (ctx) raise { Proj(FI($startpos, $endpos), $1(ctx), $3) } }
+  | path_term "." INTV                            { fn (ctx) raise { Proj(FI($startpos, $endpos), $1(ctx), $3.to_string()) } }
   ;
 
 ascribe_term
   : atom_term                                     { $1 }
-  | atom_term "as" type                           { fn(ctx) { Ascribe(FI($startpos, $endpos), $1(ctx), $3(ctx)) } }
+  | atom_term "as" type                           { fn (ctx) raise { Ascribe(FI($startpos, $endpos), $1(ctx), $3(ctx)) } }
   ;
 
 term_seq
   : term                                          { $1 }
   | term ";" term_seq                             {
-      fn(ctx) {
+      fn (ctx) raise {
         let info = FI($startpos, $endpos)
         App(info, Abs(info, "_", Unit, $3(ctx.add_name("_"))), $1(ctx))
       }
@@ -168,10 +168,10 @@ term_seq
 
 atom_term
   : "(" term_seq ")"                              { $2 }
-  | "true"                                        { fn(_) { True(FI($startpos, $endpos)) } }
-  | "false"                                       { fn(_) { False(FI($startpos, $endpos)) } }
+  | "true"                                        { fn (_) { True(FI($startpos, $endpos)) } }
+  | "false"                                       { fn (_) { False(FI($startpos, $endpos)) } }
   | INTV                                          {
-      fn(_) {
+      fn (_) {
         let info = FI($startpos, $endpos)
         loop ($1, Zero(info)) {
           (0, acc) => break acc
@@ -179,47 +179,47 @@ atom_term
         }
       }
     }
-  | LCID                                          { fn(ctx) { Var(FI($startpos, $endpos), ctx.name_to_index($1, FI($startpos, $endpos)), ctx.length()) } }
-  | "unit"                                        { fn(_) { Unit(FI($startpos, $endpos)) } }
-  | "{" label_terms "}"                           { fn(ctx) { Record(FI($startpos, $endpos), $2(ctx, 1)) } }
-  | "<" LCID "=" term ">" "as" type               { fn(ctx) { Tag(FI($startpos, $endpos), $2, $4(ctx), $7(ctx)) } }
-  | STRINGV                                       { fn(_) { String(FI($startpos, $endpos), $1) } }
-  | DOUBLEV                                       { fn(_) { Double(FI($startpos, $endpos), $1) } }
-  | "fold" "[" type "]" atom_term                 { fn(ctx) { Fold(FI($startpos, $endpos), $3(ctx), $5(ctx)) } }
-  | "unfold" "[" type "]" atom_term               { fn(ctx) { Unfold(FI($startpos, $endpos), $3(ctx), $5(ctx)) } }
+  | LCID                                          { fn (ctx) raise { Var(FI($startpos, $endpos), ctx.name_to_index($1, FI($startpos, $endpos)), ctx.length()) } }
+  | "unit"                                        { fn (_) { Unit(FI($startpos, $endpos)) } }
+  | "{" label_terms "}"                           { fn (ctx) raise { Record(FI($startpos, $endpos), $2(ctx, 1)) } }
+  | "<" LCID "=" term ">" "as" type               { fn (ctx) raise { Tag(FI($startpos, $endpos), $2, $4(ctx), $7(ctx)) } }
+  | STRINGV                                       { fn (_) { String(FI($startpos, $endpos), $1) } }
+  | DOUBLEV                                       { fn (_) { Double(FI($startpos, $endpos), $1) } }
+  | "fold" "[" type "]" atom_term                 { fn (ctx) raise { Fold(FI($startpos, $endpos), $3(ctx), $5(ctx)) } }
+  | "unfold" "[" type "]" atom_term               { fn (ctx) raise { Unfold(FI($startpos, $endpos), $3(ctx), $5(ctx)) } }
   ;
 
 label_terms
-  :                                               { fn(_, _) { Nil } }
+  :                                               { fn (_, _) { @list.new() } }
   | nonempty_label_terms                          { $1 }
   ;
 
 nonempty_label_terms
-  : label_term                                    { fn(ctx, i) { Cons($1(ctx, i), Nil) } }
-  | label_term "," nonempty_label_terms           { fn(ctx, i) { Cons($1(ctx, i), $3(ctx, i + 1)) } }
+  : label_term                                    { fn (ctx, i) raise { @list.cons($1(ctx, i), @list.new()) } }
+  | label_term "," nonempty_label_terms           { fn (ctx, i) raise { @list.cons($1(ctx, i), $3(ctx, i + 1)) } }
   ;
 
 label_term
-  : LCID "=" term                                 { fn(ctx, _) { ($1, $3(ctx)) } }
-  | term                                          { fn(ctx, i) { (i.to_string(), $1(ctx)) } }
+  : LCID "=" term                                 { fn (ctx, _) raise { ($1, $3(ctx)) } }
+  | term                                          { fn (ctx, i) raise { (i.to_string(), $1(ctx)) } }
   ;
 
 type
   : arr_type                                      { $1 }
-  | "Rec" UCID "." type                           { fn(ctx) { Rec($2, $4(ctx.add_name($2))) } }
+  | "Rec" UCID "." type                           { fn (ctx) raise { Rec($2, $4(ctx.add_name($2))) } }
   ;
 
 arr_type
   : atom_type                                     { $1 }
-  | atom_type "->" arr_type                       { fn(ctx) { Arr($1(ctx), $3(ctx)) } }
+  | atom_type "->" arr_type                       { fn (ctx) raise { Arr($1(ctx), $3(ctx)) } }
   ;
 
 atom_type
   : "(" type ")"                                  { $2 }
-  | "Bool"                                        { fn(_) { Bool } }
-  | "Nat"                                         { fn(_) { Nat } }
+  | "Bool"                                        { fn (_) { Bool } }
+  | "Nat"                                         { fn (_) { Nat } }
   | UCID                                          {
-      fn(ctx) {
+      fn (ctx) raise {
         if ctx.is_name_bound($1) {
           Var(ctx.name_to_index($1, FI($startpos, $endpos)), ctx.length())
         } else {
@@ -227,24 +227,24 @@ atom_type
         }
       }
     }
-  | "Unit"                                        { fn(_) { Unit } }
-  | "{" label_types "}"                           { fn(ctx) { Record($2(ctx, 1)) } }
-  | "<" label_types ">"                           { fn(ctx) { Variant($2(ctx, 1)) } }
-  | "String"                                      { fn(_) { String } }
-  | "Double"                                      { fn(_) { Double } }
+  | "Unit"                                        { fn (_) { Unit } }
+  | "{" label_types "}"                           { fn (ctx) raise { Record($2(ctx, 1)) } }
+  | "<" label_types ">"                           { fn (ctx) raise { Variant($2(ctx, 1)) } }
+  | "String"                                      { fn (_) { String } }
+  | "Double"                                      { fn (_) { Double } }
   ;
 
 label_types
-  :                                               { fn(_, _) { Nil } }
+  :                                               { fn (_, _) { @list.new() } }
   | nonempty_label_types                          { $1 }
   ;
 
 nonempty_label_types
-  : label_type                                    { fn(ctx, i) { Cons($1(ctx, i), Nil) } }
-  | label_type "," nonempty_label_types           { fn(ctx, i) { Cons($1(ctx, i), $3(ctx, i + 1)) } }
+  : label_type                                    { fn (ctx, i) raise { @list.cons($1(ctx, i), @list.new()) } }
+  | label_type "," nonempty_label_types           { fn (ctx, i) raise { @list.cons($1(ctx, i), $3(ctx, i + 1)) } }
   ;
 
 label_type
-  : LCID ":" type                                 { fn(ctx, _) { ($1, $3(ctx)) } }
-  | type                                          { fn(ctx, i) { (i.to_string(), $1(ctx)) } }
+  : LCID ":" type                                 { fn (ctx, _) raise { ($1, $3(ctx)) } }
+  | type                                          { fn (ctx, i) raise { (i.to_string(), $1(ctx)) } }
   ;

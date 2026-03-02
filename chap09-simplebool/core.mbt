@@ -1,5 +1,5 @@
 ///|
-fn is_numerical(self : Term) -> Bool {
+fn Term::is_numerical(self : Term) -> Bool {
   match self {
     Zero(_) => true
     Succ(_, t1) => t1.is_numerical()
@@ -8,7 +8,7 @@ fn is_numerical(self : Term) -> Bool {
 }
 
 ///|
-fn is_val(self : Term) -> Bool {
+fn Term::is_val(self : Term) -> Bool {
   match self {
     True(_) => true
     False(_) => true
@@ -21,7 +21,7 @@ fn is_val(self : Term) -> Bool {
 suberror NoRuleApplies
 
 ///|
-fn eval1(self : Term, ctx : Context) -> Term raise NoRuleApplies {
+fn Term::eval1(self : Term, ctx : Context) -> Term raise NoRuleApplies {
   match self {
     True(_) => raise NoRuleApplies
     False(_) => raise NoRuleApplies
@@ -101,7 +101,7 @@ fn eval1(self : Term, ctx : Context) -> Term raise NoRuleApplies {
 }
 
 ///|
-fn eval(self : Term, ctx : Context) -> Term {
+fn Term::eval(self : Term, ctx : Context) -> Term {
   loop self {
     t =>
       try {
@@ -113,7 +113,7 @@ fn eval(self : Term, ctx : Context) -> Term {
 }
 
 ///|
-fn derive_type(self : Term, ctx : Context) -> Type raise {
+fn Term::derive_type(self : Term, ctx : Context) -> Type raise {
   match self {
     True(_) => Bool
     False(_) => Bool
@@ -186,7 +186,7 @@ fn Binding::eval(self : Binding, ctx : Context) -> Binding {
 fn Binding::derive_type(
   self : Binding,
   ctx : Context,
-  info : Info
+  info : Info,
 ) -> Binding raise {
   match self {
     Name => Name

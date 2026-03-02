@@ -144,7 +144,7 @@ iseven 7;
 diverge = lambda _:Unit. fix (lambda x:T. x);
 
 lambda X. lambda x:X. x;
-(lambda X. lambda x:X. x) [All X. X->X.];
+(lambda X. lambda x:X. x) [All X. X->X];
 
 {*All Y.Y, lambda x:(All Y.Y). x} as {Some X, X->X};
 
@@ -153,39 +153,39 @@ lambda X. lambda x:X. x;
 ops.f ops.c;
 
 id = lambda X. lambda x:X. x;
-id [Nat.];
-id [Nat.] 0;
+id [Nat];
+id [Nat] 0;
 
 double = lambda X. lambda f:X->X. lambda a:X. f (f a);
 
-doubleNat = double [Nat.];
-doubleNatArrowNat = double [Nat->Nat.];
+doubleNat = double [Nat];
+doubleNatArrowNat = double [Nat->Nat];
 
-double [Nat.] (lambda x:Nat. succ(succ(x))) 3;
+double [Nat] (lambda x:Nat. succ(succ(x))) 3;
 
-selfApp = lambda x:All X.X->X. x [All X.X->X.] x;
+selfApp = lambda x:All X.X->X. x [All X.X->X] x;
 
-quadruple = lambda X. double [X->X.] (double [X.]);
+quadruple = lambda X. double [X->X] (double [X]);
 
 CBool = All X. X->X->X;
 tru = lambda X. lambda t:X. lambda f:X. t;
 fls = lambda X. lambda t:X. lambda f:X. f;
 
-not = lambda b:CBool. lambda X. lambda t:X. lambda f:X. b [X.] f t;
+not = lambda b:CBool. lambda X. lambda t:X. lambda f:X. b [X] f t;
 
 CNat = All X. (X->X) -> X -> X;
 c0 = lambda X. lambda s:X->X. lambda z:X. z;
 c1 = lambda X. lambda s:X->X. lambda z:X. s z;
 c2 = lambda X. lambda s:X->X. lambda z:X. s (s z);
 
-csucc = lambda n:CNat. lambda X. lambda s:X->X. lambda z:X. s (n [X.] s z);
-cplus = lambda m:CNat. lambda n:CNat. m [CNat.] csucc n;
+csucc = lambda n:CNat. lambda X. lambda s:X->X. lambda z:X. s (n [X] s z);
+cplus = lambda m:CNat. lambda n:CNat. m [CNat] csucc n;
 
-cnat2nat = lambda n:CNat. n [Nat.] (lambda x:Nat. succ(x)) 0;
+cnat2nat = lambda n:CNat. n [Nat] (lambda x:Nat. succ(x)) 0;
 cnat2nat (cplus (csucc c0) (csucc (csucc c0)));
 
-ctimes = lambda m:CNat. lambda n:CNat. lambda X. lambda s:X->X. n [X.] (m [X.] s);
-cexp = lambda m:CNat. lambda n:CNat. lambda X. n [X->X.] (m [X.]);
+ctimes = lambda m:CNat. lambda n:CNat. lambda X. lambda s:X->X. n [X] (m [X] s);
+cexp = lambda m:CNat. lambda n:CNat. lambda X. n [X->X] (m [X]);
 cnat2nat (ctimes c2 (csucc c2));
 cnat2nat (cexp c2 (csucc c2));
 
@@ -216,8 +216,8 @@ f2 ra;
 f2 rab;
 
 f2poly = lambda X<:{a:Nat}. lambda x:X. {orig=x, _succ=succ(x.a)};
-f2poly [{a:Nat}.] ra;
-f2poly [{a:Nat, b:Bool}.] rab;
+f2poly [{a:Nat}] ra;
+f2poly [{a:Nat, b:Bool}] rab;
 
 SNat = All X<:Top. All S<:X. All Z<:X. (X->S) -> Z -> X;
 
@@ -229,9 +229,9 @@ sone = (lambda X. lambda S<:X. lambda Z<:X. lambda s:X->S. lambda z:Z. s z) as S
 stwo = (lambda X. lambda S<:X. lambda Z<:X. lambda s:X->S. lambda z:Z. s (s z)) as SPos;
 sthree = (lambda X. lambda S<:X. lambda Z<:X. lambda s:X->S. lambda z:Z. s (s (s z))) as SPos;
 
-ssucc = lambda n:SNat. (lambda X. lambda S<:X. lambda Z<:X. lambda s:X->S. lambda z:Z. s (n [X.] [S.] [Z.] s z)) as SPos;
+ssucc = lambda n:SNat. (lambda X. lambda S<:X. lambda Z<:X. lambda s:X->S. lambda z:Z. s (n [X] [S] [Z] s z)) as SPos;
 
-spluspp = lambda n:SPos. lambda m:SPos. (lambda X. lambda S<:X. lambda Z<:X. lambda s:X->S. lambda z:Z. n [X.] [S.] [S.] s (m [X.] [S.] [Z.] s z)) as SPos;
+spluspp = lambda n:SPos. lambda m:SPos. (lambda X. lambda S<:X. lambda Z<:X. lambda s:X->S. lambda z:Z. n [X] [S] [S] s (m [X] [S] [Z] s z)) as SPos;
 
 counterADT =
   {*Nat, {new = 1,
@@ -254,31 +254,31 @@ PN = Pair Nat;
 PNB = Pair Nat Bool;
 
 pair = lambda X. lambda Y. lambda x:X. lambda y:Y. lambda R. lambda p:X->Y->R. p x y;
-fst = lambda X. lambda Y. lambda p:Pair X Y. p [X.] (lambda x:X. lambda y:Y. x);
-snd = lambda X. lambda Y. lambda p:Pair X Y. p [Y.] (lambda x:X. lambda y:Y. y);
+fst = lambda X. lambda Y. lambda p:Pair X Y. p [X] (lambda x:X. lambda y:Y. x);
+snd = lambda X. lambda Y. lambda p:Pair X Y. p [Y] (lambda x:X. lambda y:Y. y);
 
-pr = pair [Nat.] [Bool.] 0 false;
-fst [Nat.] [Bool.] pr;
-snd [Nat.] [Bool.] pr;
+pr = pair [Nat] [Bool] 0 false;
+fst [Nat] [Bool] pr;
+snd [Nat] [Bool] pr;
 
 List = lambda X. All R. (X->R->R) -> R -> R;
 
 diverge = lambda X. lambda _:Unit. fix (lambda x:X. x);
 
 nil = lambda X. (lambda R. lambda c:X->R->R. lambda n:R. n) as List X;
-cons = lambda X. lambda hd:X. lambda tl:List X. (lambda R. lambda c:X->R->R. lambda n:R. c hd (tl [R.] c n)) as List X;
-isnil = lambda X. lambda l:List X. l [Bool.] (lambda _:X. lambda _:Bool. false) true;
-head = lambda X. lambda l:List X. (l [Unit->X.] (lambda hd:X. lambda _:Unit->X. lambda _:Unit. hd) (diverge [X.])) unit;
+cons = lambda X. lambda hd:X. lambda tl:List X. (lambda R. lambda c:X->R->R. lambda n:R. c hd (tl [R] c n)) as List X;
+isnil = lambda X. lambda l:List X. l [Bool] (lambda _:X. lambda _:Bool. false) true;
+head = lambda X. lambda l:List X. (l [Unit->X] (lambda hd:X. lambda _:Unit->X. lambda _:Unit. hd) (diverge [X])) unit;
 tail = lambda X. lambda l:List X.
-  (fst [List X.] [List X.] (
-    l [Pair (List X) (List X).]
+  (fst [List X] [List X] (
+    l [Pair (List X) (List X)]
       (lambda hd:X. lambda tl:Pair (List X) (List X).
-        pair [List X.] [List X.] (snd [List X.] [List X.] tl) (cons [X.] hd (snd [List X.] [List X.] tl)))
-      (pair [List X.] [List X.] (nil [X.]) (nil [X.])))) as List X;
+        pair [List X] [List X] (snd [List X] [List X] tl) (cons [X] hd (snd [List X] [List X] tl)))
+      (pair [List X] [List X] (nil [X]) (nil [X])))) as List X;
 
-ls = cons [Nat.] 1 (cons [Nat.] 2 (cons [Nat.] 3 (nil [Nat.])));
-head [Nat.] ls;
-head [Nat.] (tail [Nat.] (tail [Nat.] ls));
+ls = cons [Nat] 1 (cons [Nat] 2 (cons [Nat] 3 (nil [Nat])));
+head [Nat] ls;
+head [Nat] (tail [Nat] (tail [Nat] ls));
 
 (lambda r:{x:Top->Top}. r.x r.x)
   {x=lambda z:Top. z, y=lambda z:Top. z};

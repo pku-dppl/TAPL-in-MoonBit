@@ -26,18 +26,14 @@ impl Show for Info with output(self, logger) {
 }
 
 ///|
-suberror ErrorWithInfo (String, Info)
+suberror ErrorWithInfo {
+  ErrorWithInfo((String, Info))
+}
 
 ///|
-fn[T] error_info(msg : String, info~ : Info = UNKNOWN) -> T raise {
+fn[T] error_info(msg : String, info? : Info = UNKNOWN) -> T raise {
   raise ErrorWithInfo((msg, info))
 }
 
 ///|
-typealias @immut/list.T[Command] as ParseToplevel
-
-///|
-typealias Command as ParseCommand
-
-///|
-typealias Term as ParseTerm
+type ParseToplevel = @list.List[Command]

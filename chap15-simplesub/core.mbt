@@ -1,5 +1,5 @@
 ///|
-fn is_numerical(self : Term) -> Bool {
+fn Term::is_numerical(self : Term) -> Bool {
   match self {
     Zero(_) => true
     Succ(_, t1) => t1.is_numerical()
@@ -8,7 +8,7 @@ fn is_numerical(self : Term) -> Bool {
 }
 
 ///|
-fn is_val(self : Term) -> Bool {
+fn Term::is_val(self : Term) -> Bool {
   match self {
     True(_) => true
     False(_) => true
@@ -22,7 +22,7 @@ fn is_val(self : Term) -> Bool {
 suberror NoRuleApplies
 
 ///|
-fn eval1(self : Term, ctx : Context) -> Term raise NoRuleApplies {
+fn Term::eval1(self : Term, ctx : Context) -> Term raise NoRuleApplies {
   match self {
     True(_) => raise NoRuleApplies
     False(_) => raise NoRuleApplies
@@ -99,14 +99,14 @@ fn eval1(self : Term, ctx : Context) -> Term raise NoRuleApplies {
         App(info, t1_prime, t2)
       }
     Record(info, lts) =>
-      loop (lts, @immut/list.Nil) {
-        (Nil, _) => raise NoRuleApplies
-        (Cons((l, t), rest), acc) =>
+      loop (lts, @list.new()) {
+        (Empty, _) => raise NoRuleApplies
+        (More((l, t), tail=rest), acc) =>
           if t.is_val() {
-            continue (rest, Cons((l, t), acc))
+            continue (rest, @list.cons((l, t), acc))
           } else {
             let t_prime = t.eval1(ctx)
-            break Record(info, acc.rev_concat(Cons((l, t_prime), rest)))
+            break Record(info, acc.rev_concat(@list.cons((l, t_prime), rest)))
           }
       }
     Proj(info, t1, l) =>
@@ -127,7 +127,7 @@ fn eval1(self : Term, ctx : Context) -> Term raise NoRuleApplies {
 }
 
 ///|
-fn eval(self : Term, ctx : Context) -> Term {
+fn Term::eval(self : Term, ctx : Context) -> Term {
   loop self {
     t =>
       try {
@@ -203,16 +203,16 @@ fn Type::meet(self : Type, other : Type) -> Type raise NoRuleApplies {
         let all_labels = labels1.concat(
           labels2.filter(fn(l) { not(labels1.contains(l)) }),
         )
-        let all_ltys = loop (all_labels, @immut/list.Nil) {
-          (Nil, acc) => break acc.rev()
-          (Cons(l, rest), acc) => {
+        let all_ltys = loop (all_labels, @list.new()) {
+          (Empty, acc) => break acc.rev()
+          (More(l, tail=rest), acc) => {
             let ty = match (ltys1.lookup(l), ltys2.lookup(l)) {
               (Some(ty1), Some(ty2)) => ty1.meet(ty2)
               (Some(ty1), None) => ty1
               (None, Some(ty2)) => ty2
               (None, None) => panic()
             }
-            continue (rest, Cons((l, ty), acc))
+            continue (rest, @list.cons((l, ty), acc))
           }
         }
         Record(all_ltys)
@@ -223,7 +223,7 @@ fn Type::meet(self : Type, other : Type) -> Type raise NoRuleApplies {
 }
 
 ///|
-fn derive_type(self : Term, ctx : Context) -> Type raise {
+fn Term::derive_type(self : Term, ctx : Context) -> Type raise {
   match self {
     True(_) => Bool
     False(_) => Bool
@@ -274,11 +274,11 @@ fn derive_type(self : Term, ctx : Context) -> Type raise {
       }
     }
     Record(info, lts) =>
-      loop (lts, @immut/list.Nil) {
-        (Nil, acc) => break Record(acc.rev())
-        (Cons((l, t), rest), acc) =>
-          if acc.lookup(l).is_empty() {
-            continue (rest, Cons((l, t.derive_type(ctx)), acc))
+      loop (lts, @list.new()) {
+        (Empty, acc) => break Record(acc.rev())
+        (More((l, t), tail=rest), acc) =>
+          if acc.lookup(l) is None {
+            continue (rest, @list.cons((l, t.derive_type(ctx)), acc))
           } else {
             error_info("duplicate label \{l} is not allowed", info~)
           }
@@ -311,7 +311,7 @@ fn Binding::eval(self : Binding, ctx : Context) -> Binding {
 fn Binding::derive_type(
   self : Binding,
   ctx : Context,
-  info : Info
+  info : Info,
 ) -> Binding raise {
   match self {
     Name => Name

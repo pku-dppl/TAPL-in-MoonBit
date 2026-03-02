@@ -1,5 +1,5 @@
 ///|
-fn is_numerical(self : Term) -> Bool {
+fn Term::is_numerical(self : Term) -> Bool {
   match self {
     Zero(_) => true
     Succ(_, t1) => t1.is_numerical()
@@ -8,7 +8,7 @@ fn is_numerical(self : Term) -> Bool {
 }
 
 ///|
-fn is_val(self : Term) -> Bool {
+fn Term::is_val(self : Term) -> Bool {
   match self {
     True(_) => true
     False(_) => true
@@ -20,7 +20,7 @@ fn is_val(self : Term) -> Bool {
 }
 
 ///|
-type Store Array[Term]
+struct Store(Array[Term])
 
 ///|
 fn Store::new() -> Store {
@@ -29,31 +29,30 @@ fn Store::new() -> Store {
 
 ///|
 fn Store::extend(self : Store, t : Term) -> Int {
-  let l = self._.length()
-  self._.push(t)
+  let l = self.0.length()
+  self.0.push(t)
   l
 }
 
 ///|
 fn Store::lookup(self : Store, l : Int) -> Term {
-  self._[l]
+  self.0[l]
 }
 
 ///|
 fn Store::update(self : Store, l : Int, t : Term) -> Unit {
-  self._[l] = t
-}
-
-///|
-fn Store::shift(self : Store, d : Int) -> Unit {
-  self._.map_inplace(fn(t) { t.shift(d) })
+  self.0[l] = t
 }
 
 ///|
 suberror NoRuleApplies
 
 ///|
-fn eval1(self : Term, ctx : Context, store : Store) -> Term raise NoRuleApplies {
+fn Term::eval1(
+  self : Term,
+  ctx : Context,
+  store : Store,
+) -> Term raise NoRuleApplies {
   match self {
     True(_) => raise NoRuleApplies
     False(_) => raise NoRuleApplies
@@ -181,7 +180,7 @@ fn eval1(self : Term, ctx : Context, store : Store) -> Term raise NoRuleApplies 
 }
 
 ///|
-fn eval(self : Term, ctx : Context, store : Store) -> Term {
+fn Term::eval(self : Term, ctx : Context, store : Store) -> Term {
   loop self {
     t =>
       try {
@@ -193,7 +192,7 @@ fn eval(self : Term, ctx : Context, store : Store) -> Term {
 }
 
 ///|
-fn derive_type(self : Term, ctx : Context) -> Type raise {
+fn Term::derive_type(self : Term, ctx : Context) -> Type raise {
   match self {
     True(_) => Bool
     False(_) => Bool
@@ -298,7 +297,7 @@ fn Binding::eval(self : Binding, ctx : Context, store : Store) -> Binding {
 fn Binding::derive_type(
   self : Binding,
   ctx : Context,
-  info : Info
+  info : Info,
 ) -> Binding raise {
   match self {
     Name => Name

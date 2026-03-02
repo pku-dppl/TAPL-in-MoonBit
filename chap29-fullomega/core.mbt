@@ -1,5 +1,5 @@
 ///|
-fn is_numerical(self : Term) -> Bool {
+fn Term::is_numerical(self : Term) -> Bool {
   match self {
     Zero(_) => true
     Succ(_, t1) => t1.is_numerical()
@@ -8,7 +8,7 @@ fn is_numerical(self : Term) -> Bool {
 }
 
 ///|
-fn is_val(self : Term) -> Bool {
+fn Term::is_val(self : Term) -> Bool {
   match self {
     True(_) => true
     False(_) => true
@@ -28,7 +28,7 @@ fn is_val(self : Term) -> Bool {
 suberror NoRuleApplies
 
 ///|
-fn eval1(self : Term, ctx : Context) -> Term raise NoRuleApplies {
+fn Term::eval1(self : Term, ctx : Context) -> Term raise NoRuleApplies {
   match self {
     True(_) => raise NoRuleApplies
     False(_) => raise NoRuleApplies
@@ -113,14 +113,14 @@ fn eval1(self : Term, ctx : Context) -> Term raise NoRuleApplies {
         Ascribe(info, t1_prime, ty1)
       }
     Record(info, lts) =>
-      loop (lts, @immut/list.Nil) {
-        (Nil, _) => raise NoRuleApplies
-        (Cons((l, t), rest), acc) =>
+      loop (lts, @list.new()) {
+        (Empty, _) => raise NoRuleApplies
+        (More((l, t), tail=rest), acc) =>
           if t.is_val() {
-            continue (rest, Cons((l, t), acc))
+            continue (rest, @list.cons((l, t), acc))
           } else {
             let t_prime = t.eval1(ctx)
-            break Record(info, acc.rev_concat(Cons((l, t_prime), rest)))
+            break Record(info, acc.rev_concat(@list.cons((l, t_prime), rest)))
           }
       }
     Proj(info, t1, l) =>
@@ -217,7 +217,7 @@ fn eval1(self : Term, ctx : Context) -> Term raise NoRuleApplies {
 }
 
 ///|
-fn eval(self : Term, ctx : Context) -> Term {
+fn Term::eval(self : Term, ctx : Context) -> Term {
   loop self {
     t =>
       try {
@@ -287,17 +287,21 @@ fn Type::equiv(self : Type, other : Type, ctx : Context) -> Bool {
     (Id(b1), Id(b2)) => b1 == b2
     (Unit, Unit) => true
     (Record(ltys1), Record(ltys2)) =>
-      ltys1
-      .zip(ltys2)
-      .map_or(false, fn(l) {
-        l.all(fn(p) { p.0.0 == p.1.0 && p.0.1.equiv(p.1.1, ctx) })
-      })
+      if ltys1.length() != ltys2.length() {
+        false
+      } else {
+        ltys1
+        .zip(ltys2)
+        .all(fn(p) { p.0.0 == p.1.0 && p.0.1.equiv(p.1.1, ctx) })
+      }
     (Variant(ltys1), Variant(ltys2)) =>
-      ltys1
-      .zip(ltys2)
-      .map_or(false, fn(l) {
-        l.all(fn(p) { p.0.0 == p.1.0 && p.0.1.equiv(p.1.1, ctx) })
-      })
+      if ltys1.length() != ltys2.length() {
+        false
+      } else {
+        ltys1
+        .zip(ltys2)
+        .all(fn(p) { p.0.0 == p.1.0 && p.0.1.equiv(p.1.1, ctx) })
+      }
     (String, String) => true
     (Double, Double) => true
     (All(x1, kd11, ty12), All(_, kd21, ty22)) => {
@@ -319,7 +323,7 @@ fn Type::equiv(self : Type, other : Type, ctx : Context) -> Bool {
 }
 
 ///|
-fn derive_type(self : Term, ctx : Context) -> Type raise {
+fn Term::derive_type(self : Term, ctx : Context) -> Type raise {
   match self {
     True(_) => Bool
     False(_) => Bool
@@ -390,11 +394,11 @@ fn derive_type(self : Term, ctx : Context) -> Type raise {
       }
     }
     Record(info, lts) =>
-      loop (lts, @immut/list.Nil) {
-        (Nil, acc) => break Record(acc.rev())
-        (Cons((l, t), rest), acc) =>
-          if acc.lookup(l).is_empty() {
-            continue (rest, Cons((l, t.derive_type(ctx)), acc))
+      loop (lts, @list.new()) {
+        (Empty, acc) => break Record(acc.rev())
+        (More((l, t), tail=rest), acc) =>
+          if acc.lookup(l) is None {
+            continue (rest, @list.cons((l, t.derive_type(ctx)), acc))
           } else {
             error_info("duplicate label \{l} is not allowed", info~)
           }
@@ -426,20 +430,20 @@ fn derive_type(self : Term, ctx : Context) -> Type raise {
       match t1.derive_type(ctx).simplify(ctx) {
         Variant(ltys) => {
           for case in cases {
-            if ltys.lookup(case.0).is_empty() {
+            if ltys.lookup(case.0) is None {
               error_info("label \{case.0} not in type", info~)
             }
           }
-          let case_tys = loop (cases, @immut/list.Nil) {
-            (Nil, acc) => break acc.rev()
-            (Cons((l, (x, t)), rest), acc) => {
+          let case_tys = loop (cases, @list.new()) {
+            (Empty, acc) => break acc.rev()
+            (More((l, (x, t)), tail=rest), acc) => {
               let ty = ltys.lookup(l).unwrap()
               let ctx1 = ctx.add_binding(x, Var(ty))
-              continue (rest, Cons(t.derive_type(ctx1).shift(-1), acc))
+              continue (rest, @list.cons(t.derive_type(ctx1).shift(-1), acc))
             }
           }
           let ty1 = case_tys.unsafe_head()
-          for ty in case_tys.tail() {
+          for ty in case_tys.unsafe_tail() {
             if not(ty.equiv(ty1, ctx)) {
               error_info("cases do not have the same type", info~)
             }
@@ -526,7 +530,7 @@ fn derive_type(self : Term, ctx : Context) -> Type raise {
 }
 
 ///|
-fn derive_kind(self : Type, ctx : Context, info : Info) -> Kind raise {
+fn Type::derive_kind(self : Type, ctx : Context, info : Info) -> Kind raise {
   match self {
     Bool => Star
     Nat => Star
@@ -613,7 +617,7 @@ fn Binding::eval(self : Binding, ctx : Context) -> Binding {
 fn Binding::derive_type(
   self : Binding,
   ctx : Context,
-  info : Info
+  info : Info,
 ) -> Binding raise {
   match self {
     Name => Name

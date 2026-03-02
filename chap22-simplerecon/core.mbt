@@ -1,5 +1,5 @@
 ///|
-fn is_numerical(self : Term) -> Bool {
+fn Term::is_numerical(self : Term) -> Bool {
   match self {
     Zero(_) => true
     Succ(_, t1) => t1.is_numerical()
@@ -8,7 +8,7 @@ fn is_numerical(self : Term) -> Bool {
 }
 
 ///|
-fn is_val(self : Term) -> Bool {
+fn Term::is_val(self : Term) -> Bool {
   match self {
     True(_) => true
     False(_) => true
@@ -21,7 +21,7 @@ fn is_val(self : Term) -> Bool {
 suberror NoRuleApplies
 
 ///|
-fn eval1(self : Term, ctx : Context) -> Term raise NoRuleApplies {
+fn Term::eval1(self : Term, ctx : Context) -> Term raise NoRuleApplies {
   match self {
     True(_) => raise NoRuleApplies
     False(_) => raise NoRuleApplies
@@ -101,7 +101,7 @@ fn eval1(self : Term, ctx : Context) -> Term raise NoRuleApplies {
 }
 
 ///|
-fn eval(self : Term, ctx : Context) -> Term {
+fn Term::eval(self : Term, ctx : Context) -> Term {
   loop self {
     t =>
       try {
@@ -130,21 +130,7 @@ fn UVarGen::next(self : UVarGen) -> String {
 }
 
 ///|
-type Constr @deque.T[(Type, Type)]
-
-///|
-impl Show for Constr with output(self, logger) {
-  logger.write_string("{")
-  for i, p in self._ {
-    if i > 0 {
-      logger.write_string(", ")
-    }
-    p.0.output(false, logger)
-    logger.write_string("=")
-    p.1.output(false, logger)
-  }
-  logger.write_string("}")
-}
+struct Constr(@deque.Deque[(Type, Type)])
 
 ///|
 fn Constr::new() -> Constr {
@@ -153,32 +139,32 @@ fn Constr::new() -> Constr {
 
 ///|
 fn Constr::push_back(self : Constr, p : (Type, Type)) -> Unit {
-  self._.push_back(p)
+  self.0.push_back(p)
 }
 
 ///|
 fn Constr::push_front(self : Constr, p : (Type, Type)) -> Unit {
-  self._.push_front(p)
+  self.0.push_front(p)
 }
 
 ///|
 fn Constr::pop_front(self : Constr) -> (Type, Type)? {
-  self._.pop_front()
+  self.0.pop_front()
 }
 
 ///|
 fn Constr::append(self : Constr, other : Constr) -> Unit {
-  for p in other._ {
+  for p in other.0 {
     self.push_back(p)
   }
 }
 
 ///|
-fn recon_type(
+fn Term::recon_type(
   self : Term,
   ctx : Context,
   uvar_gen : UVarGen,
-  constr : Constr
+  constr : Constr,
 ) -> Type raise {
   match self {
     True(_) => Bool
@@ -252,7 +238,7 @@ fn Type::subst(self : Type, x : String, s : Type) -> Type {
 ///|
 fn Type::subst_constr(self : Type, constr : Constr) -> Type {
   let mut ty = self
-  for p in constr._ {
+  for p in constr.0 {
     match p {
       (Id(x), ty2) => ty = ty.subst(x, ty2)
       _ => panic()
@@ -263,8 +249,8 @@ fn Type::subst_constr(self : Type, constr : Constr) -> Type {
 
 ///|
 fn Constr::subst(self : Constr, x : String, s : Type) -> Unit {
-  for i, p in self._ {
-    self._[i] = (p.0.subst(x, s), p.1.subst(x, s))
+  for i, p in self.0 {
+    self.0[i] = (p.0.subst(x, s), p.1.subst(x, s))
   }
 }
 
@@ -331,7 +317,7 @@ fn Binding::recon_type(
   ctx : Context,
   uvar_gen : UVarGen,
   constr : Constr,
-  info : Info
+  info : Info,
 ) -> Binding raise {
   match self {
     Name => Name

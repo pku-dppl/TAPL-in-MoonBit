@@ -1,4 +1,5 @@
 ///|
+#alias(ParseTerm)
 enum Term {
   True(Info)
   False(Info)
@@ -10,6 +11,7 @@ enum Term {
 }
 
 ///|
+#alias(ParseCommand)
 enum Command {
   Import(String)
   Eval(Info, Term)

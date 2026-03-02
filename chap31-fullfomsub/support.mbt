@@ -26,45 +26,47 @@ impl Show for Info with output(self, logger) {
 }
 
 ///|
-suberror ErrorWithInfo (String, Info)
+suberror ErrorWithInfo {
+  ErrorWithInfo((String, Info))
+}
 
 ///|
-fn[T] error_info(msg : String, info~ : Info = UNKNOWN) -> T raise {
+fn[T] error_info(msg : String, info? : Info = UNKNOWN) -> T raise {
   raise ErrorWithInfo((msg, info))
 }
 
 ///|
-typealias (Context) -> (@immut/list.T[Command], Context) raise Error as ParseToplevel
+type ParseToplevel = (Context) -> (@list.List[Command], Context) raise Error
 
 ///|
-typealias (Context) -> (Command, Context) raise Error as ParseCommand
+type ParseCommand = (Context) -> (Command, Context) raise Error
 
 ///|
-typealias (Context) -> Binding raise Error as ParseBinder
+type ParseBinder = (Context) -> Binding raise Error
 
 ///|
-typealias (Context) -> Term raise Error as ParseTerm
+type ParseTerm = (Context) -> Term raise Error
 
 ///|
-typealias (Context) -> @immut/list.T[(String, (String, Term))] raise Error as ParseCases
+type ParseCases = (Context) -> @list.List[(String, (String, Term))] raise Error
 
 ///|
-typealias (Context) -> (String, (String, Term)) raise Error as ParseCase
+type ParseCase = (Context) -> (String, (String, Term)) raise Error
 
 ///|
-typealias (Context, Int) -> @immut/list.T[(String, Term)] raise Error as ParseLabelTerms
+type ParseLabelTerms = (Context, Int) -> @list.List[(String, Term)] raise Error
 
 ///|
-typealias (Context, Int) -> (String, Term) raise Error as ParseLabelTerm
+type ParseLabelTerm = (Context, Int) -> (String, Term) raise Error
 
 ///|
-typealias (Context) -> Type raise Error as ParseType
+type ParseType = (Context) -> Type raise Error
 
 ///|
-typealias (Context, Int) -> @immut/list.T[(String, Type)] raise Error as ParseLabelTypes
+type ParseLabelTypes = (Context, Int) -> @list.List[(String, Type)] raise Error
 
 ///|
-typealias (Context, Int) -> (String, Type) raise Error as ParseLabelType
+type ParseLabelType = (Context, Int) -> (String, Type) raise Error
 
 ///|
-typealias (Context) -> Kind as ParseKind
+type ParseKind = (Context) -> Kind

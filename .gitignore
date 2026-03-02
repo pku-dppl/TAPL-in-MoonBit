@@ -1,5 +1,8 @@
-target/
+.DS_Store
+_build/
 .mooncakes/
+.moonagent/
+
 parser.mbt
 parser.mbt.map.json
 lexer.mbt

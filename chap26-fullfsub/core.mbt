@@ -1,5 +1,5 @@
 ///|
-fn is_numerical(self : Term) -> Bool {
+fn Term::is_numerical(self : Term) -> Bool {
   match self {
     Zero(_) => true
     Succ(_, t1) => t1.is_numerical()
@@ -8,7 +8,7 @@ fn is_numerical(self : Term) -> Bool {
 }
 
 ///|
-fn is_val(self : Term) -> Bool {
+fn Term::is_val(self : Term) -> Bool {
   match self {
     True(_) => true
     False(_) => true
@@ -28,7 +28,7 @@ fn is_val(self : Term) -> Bool {
 suberror NoRuleApplies
 
 ///|
-fn eval1(self : Term, ctx : Context) -> Term raise NoRuleApplies {
+fn Term::eval1(self : Term, ctx : Context) -> Term raise NoRuleApplies {
   match self {
     True(_) => raise NoRuleApplies
     False(_) => raise NoRuleApplies
@@ -113,14 +113,14 @@ fn eval1(self : Term, ctx : Context) -> Term raise NoRuleApplies {
         Ascribe(info, t1_prime, ty1)
       }
     Record(info, lts) =>
-      loop (lts, @immut/list.Nil) {
-        (Nil, _) => raise NoRuleApplies
-        (Cons((l, t), rest), acc) =>
+      loop (lts, @list.new()) {
+        (Empty, _) => raise NoRuleApplies
+        (More((l, t), tail=rest), acc) =>
           if t.is_val() {
-            continue (rest, Cons((l, t), acc))
+            continue (rest, @list.cons((l, t), acc))
           } else {
             let t_prime = t.eval1(ctx)
-            break Record(info, acc.rev_concat(Cons((l, t_prime), rest)))
+            break Record(info, acc.rev_concat(@list.cons((l, t_prime), rest)))
           }
       }
     Proj(info, t1, l) =>
@@ -217,7 +217,7 @@ fn eval1(self : Term, ctx : Context) -> Term raise NoRuleApplies {
 }
 
 ///|
-fn eval(self : Term, ctx : Context) -> Term {
+fn Term::eval(self : Term, ctx : Context) -> Term {
   loop self {
     t =>
       try {
@@ -297,17 +297,21 @@ fn Type::equiv(self : Type, other : Type, ctx : Context) -> Bool {
     (Id(b1), Id(b2)) => b1 == b2
     (Unit, Unit) => true
     (Record(ltys1), Record(ltys2)) =>
-      ltys1
-      .zip(ltys2)
-      .map_or(false, fn(l) {
-        l.all(fn(p) { p.0.0 == p.1.0 && p.0.1.equiv(p.1.1, ctx) })
-      })
+      if ltys1.length() != ltys2.length() {
+        false
+      } else {
+        ltys1
+        .zip(ltys2)
+        .all(fn(p) { p.0.0 == p.1.0 && p.0.1.equiv(p.1.1, ctx) })
+      }
     (Variant(ltys1), Variant(ltys2)) =>
-      ltys1
-      .zip(ltys2)
-      .map_or(false, fn(l) {
-        l.all(fn(p) { p.0.0 == p.1.0 && p.0.1.equiv(p.1.1, ctx) })
-      })
+      if ltys1.length() != ltys2.length() {
+        false
+      } else {
+        ltys1
+        .zip(ltys2)
+        .all(fn(p) { p.0.0 == p.1.0 && p.0.1.equiv(p.1.1, ctx) })
+      }
     (String, String) => true
     (Double, Double) => true
     (All(x1, ty11, ty12), All(_, ty21, ty22)) => {
@@ -332,7 +336,7 @@ fn Type::subtype_of(self : Type, other : Type, ctx : Context) -> Bool {
     let ty2 = other.simplify(ctx)
     match (ty1, ty2) {
       (_, Top) => true
-      (Var(_), _) => (try? ty1.promote(ctx)).unwrap().subtype_of(ty2, ctx)
+      (Var(_), _) => (try! ty1.promote(ctx)).subtype_of(ty2, ctx)
       (Arr(ty11, ty12), Arr(ty21, ty22)) =>
         ty21.subtype_of(ty11, ctx) && ty12.subtype_of(ty22, ctx)
       (Record(ltys1), Record(ltys2)) =>
@@ -391,16 +395,16 @@ fn Type::join(self : Type, other : Type, ctx : Context) -> Type {
         let all_labels = labels1.concat(
           labels2.filter(fn(l) { not(labels1.contains(l)) }),
         )
-        let all_ltys = loop (all_labels, @immut/list.Nil) {
-          (Nil, acc) => break acc.rev()
-          (Cons(l, rest), acc) => {
+        let all_ltys = loop (all_labels, @list.new()) {
+          (Empty, acc) => break acc.rev()
+          (More(l, tail=rest), acc) => {
             let ty = match (ltys1.lookup(l), ltys2.lookup(l)) {
               (Some(ty1), Some(ty2)) => ty1.join(ty2, ctx)
               (Some(ty1), None) => ty1
               (None, Some(ty2)) => ty2
               (None, None) => panic()
             }
-            continue (rest, Cons((l, ty), acc))
+            continue (rest, @list.cons((l, ty), acc))
           }
         }
         Variant(all_ltys)
@@ -425,7 +429,7 @@ fn Type::join(self : Type, other : Type, ctx : Context) -> Type {
 fn Type::meet(
   self : Type,
   other : Type,
-  ctx : Context
+  ctx : Context,
 ) -> Type raise NoRuleApplies {
   if self.subtype_of(other, ctx) {
     self
@@ -443,16 +447,16 @@ fn Type::meet(
         let all_labels = labels1.concat(
           labels2.filter(fn(l) { not(labels1.contains(l)) }),
         )
-        let all_ltys = loop (all_labels, @immut/list.Nil) {
-          (Nil, acc) => break acc.rev()
-          (Cons(l, rest), acc) => {
+        let all_ltys = loop (all_labels, @list.new()) {
+          (Empty, acc) => break acc.rev()
+          (More(l, tail=rest), acc) => {
             let ty = match (ltys1.lookup(l), ltys2.lookup(l)) {
               (Some(ty1), Some(ty2)) => ty1.meet(ty2, ctx)
               (Some(ty1), None) => ty1
               (None, Some(ty2)) => ty2
               (None, None) => panic()
             }
-            continue (rest, Cons((l, ty), acc))
+            continue (rest, @list.cons((l, ty), acc))
           }
         }
         Record(all_ltys)
@@ -461,12 +465,12 @@ fn Type::meet(
         let labels1 = ltys1.map(fn(lty) { lty.0 })
         let labels2 = ltys2.map(fn(lty) { lty.0 })
         let common_labels = labels1.filter(fn(l) { labels2.contains(l) })
-        let common_ltys = loop (common_labels, @immut/list.Nil) {
-          (Nil, acc) => break acc.rev()
-          (Cons(l, rest), acc) => {
+        let common_ltys = loop (common_labels, @list.new()) {
+          (Empty, acc) => break acc.rev()
+          (More(l, tail=rest), acc) => {
             let ty1 = ltys1.lookup(l).unwrap()
             let ty2 = ltys2.lookup(l).unwrap()
-            continue (rest, Cons((l, ty1.meet(ty2, ctx)), acc))
+            continue (rest, @list.cons((l, ty1.meet(ty2, ctx)), acc))
           }
         }
         Variant(common_ltys)
@@ -485,7 +489,7 @@ fn Type::meet(
 }
 
 ///|
-fn derive_type(self : Term, ctx : Context) -> Type raise {
+fn Term::derive_type(self : Term, ctx : Context) -> Type raise {
   match self {
     True(_) => Bool
     False(_) => Bool
@@ -543,11 +547,11 @@ fn derive_type(self : Term, ctx : Context) -> Type raise {
         error_info("body of as-term does not have the expected type", info~)
       }
     Record(info, lts) =>
-      loop (lts, @immut/list.Nil) {
-        (Nil, acc) => break Record(acc.rev())
-        (Cons((l, t), rest), acc) =>
-          if acc.lookup(l).is_empty() {
-            continue (rest, Cons((l, t.derive_type(ctx)), acc))
+      loop (lts, @list.new()) {
+        (Empty, acc) => break Record(acc.rev())
+        (More((l, t), tail=rest), acc) =>
+          if acc.lookup(l) is None {
+            continue (rest, @list.cons((l, t.derive_type(ctx)), acc))
           } else {
             error_info("duplicate label \{l} is not allowed", info~)
           }
@@ -579,16 +583,16 @@ fn derive_type(self : Term, ctx : Context) -> Type raise {
       match t1.derive_type(ctx).lcst(ctx) {
         Variant(ltys) => {
           for case in cases {
-            if ltys.lookup(case.0).is_empty() {
+            if ltys.lookup(case.0) is None {
               error_info("label \{case.0} not in type", info~)
             }
           }
-          let case_tys = loop (cases, @immut/list.Nil) {
-            (Nil, acc) => break acc.rev()
-            (Cons((l, (x, t)), rest), acc) => {
+          let case_tys = loop (cases, @list.new()) {
+            (Empty, acc) => break acc.rev()
+            (More((l, (x, t)), tail=rest), acc) => {
               let ty = ltys.lookup(l).unwrap()
               let ctx1 = ctx.add_binding(x, Var(ty))
-              continue (rest, Cons(t.derive_type(ctx1).shift(-1), acc))
+              continue (rest, @list.cons(t.derive_type(ctx1).shift(-1), acc))
             }
           }
           let ty1 = case_tys.unsafe_head()
@@ -681,7 +685,7 @@ fn Binding::eval(self : Binding, ctx : Context) -> Binding {
 fn Binding::derive_type(
   self : Binding,
   ctx : Context,
-  info : Info
+  info : Info,
 ) -> Binding raise {
   match self {
     Name => Name
